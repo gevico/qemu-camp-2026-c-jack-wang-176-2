@@ -8,11 +8,11 @@ typedef struct {
 } Student;
 
 void insertion_sort(Student students[], int n) {
-    for(int i = 0;i<n;i++){
+    for(int i = 0; i<n ; i++){
         Student now = students[i];
-        int j = i-1;
-        while(j>=0 && students[j].score<now.score){
-            students[j+1] = students[j];
+        int j = i -1;
+        while(j>=0 &&now.score>students[j].score){
+            students[j+1]= students[j];
             j--;
         }
         students[j+1] = now;

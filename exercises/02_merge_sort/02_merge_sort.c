@@ -13,9 +13,39 @@ typedef struct {
 Student students[MAX_STUDENTS];
 Student temp[MAX_STUDENTS];
 
-void merge_sort(int left, int right) {
-    // TODO: 在这里添加你的代码
-    // I AM NOT DONE
+void merge_sort(int left, int right,Student* temp) {
+    if(left<right){
+        int mid = left + (right - left)/2;
+        merge_sort(left,mid,temp);
+        merge_sort(mid+1,right,temp);
+        int i = left;
+        int j = mid+1;
+        int k = left;
+        while(i<= mid&& j<= right){
+          if(students[i].score>=students[j].score){
+            temp[k]= students[i];
+            i++;
+           }else{
+             temp[k] = students[j];
+             j++;
+            }
+              k++;
+        }
+        while(i<=mid){
+            temp[k]= students[i];
+            i++;
+            k++;
+        }
+        while(j<=right){
+            temp[k]= students[j];
+            j++;
+            k++;
+        }
+        for(int p = 0;p<= right;p++){
+            students[p] = temp[p];
+        }
+
+    }
 }
 
 int main(void) {
@@ -39,7 +69,8 @@ int main(void) {
     }
     fclose(file);
 
-    merge_sort(0, n - 1);
+    Student* temp = malloc(sizeof(Student)*MAX_STUDENTS);
+    merge_sort(0, n - 1,temp);
 
     printf("\n归并排序后按成绩从高到低排序的学生名单：\n");
     for (int i = 0; i < n; i++) {
