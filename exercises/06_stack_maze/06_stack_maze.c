@@ -53,11 +53,12 @@ Point pop_stack(Stack *s){
 	return p;
 }
 bool isvalid(int r,int c,bool visit[MAX_ROW][MAX_COL]){
-	if(r<MAX_ROW&&c<MAX_COL&&!visit[r][c]&&maze[r][c]== 0&&r>=0&&c>=0){
+	if(r<MAX_ROW&&c<MAX_COL&&!visit[r][c]&&maze[r][c]== 0){
 		return true;
 	}
 	return false;
 }
+// 修改你的 dfs 函数
 bool dfs(Point start, Point end){
     bool visit[MAX_ROW][MAX_COL] = {false};
     
@@ -70,8 +71,6 @@ bool dfs(Point start, Point end){
     
     while(!empty_stack(&s)){
         Point cur = pop_stack(&s);
-        
-       
         if(cur.c == end.c && cur.r == end.r){
             Point p = end;
             while (!(p.r == start.r && p.c == start.c)) {
@@ -106,7 +105,7 @@ int main(void)
 	Point start = {0,0};
 	Point end = {4,4};
 	if(dfs(start,end)){
-		printf("");
+		printf("succeed");
 	}
 	return 0;
 }
