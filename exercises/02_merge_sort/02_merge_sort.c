@@ -41,7 +41,7 @@ void merge_sort(int left, int right,Student* temp) {
             j++;
             k++;
         }
-        for(int p = 0;p<= right;p++){
+        for(int p = left;p<= right;p++){
             students[p] = temp[p];
         }
 
