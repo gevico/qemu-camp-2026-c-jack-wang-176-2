@@ -15,8 +15,19 @@ Student students[MAX_STUDENTS];
 int n;
 
 int binary_search(const char *target_name) {
-    // TODO: 在这里添加你的代码
-    // I AM NOT DONE
+    int left = 0;
+    int right = MAX_STUDENTS -1;
+    int mid = left+(right-left)/2;
+    int res;
+    res = strcmp(students[mid].name,target_name);
+    if (res == 0){
+        return mid;
+    }else if(res >0){
+        right = mid -1;
+    }else{
+        left = mid +1;
+    }
+    return -1;
 }
 
 int main(void) {
@@ -46,6 +57,7 @@ int main(void) {
     int index = binary_search(query_name);
 
     printf("\n折半查找出的排序后的学生信息：\n");
+    printf("姓名");
     if (index != -1) {
         printf("姓名：%s，成绩：%d\n", students[index].name, students[index].score);
     } else {
