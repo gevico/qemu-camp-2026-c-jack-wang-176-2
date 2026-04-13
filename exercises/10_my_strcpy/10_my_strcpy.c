@@ -1,12 +1,7 @@
 #include <stdio.h>
 
 void strcpy(char* dest,const char* src){
-    while(*src != '\0'){
-        *dest = *src;
-        dest++;
-        src++;
-    }
-    *dest='\0';
+    while((*dest++=*src++)!= '\0');
 }
 
 int main() {
