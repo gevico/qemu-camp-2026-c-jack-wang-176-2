@@ -19,8 +19,16 @@ int main() {
     
     for (int i = 0; i < 3; i++) 
     {
-	    // TODO: 在这里添加你的代码
-        // I AM NOT DONE
+        students[i] = (Student*)malloc(sizeof(Student));
+        if(students[i]== NULL){
+            fclose(file);
+            return -1;
+        }
+        int read_count = fscanf(file,"%19s %49s %d",students[i]->id,students[i]->name,&students[i]->age);
+        if(read_count!=3){
+            fclose(file);
+            return -1;
+        }
     }
     fclose(file);
     

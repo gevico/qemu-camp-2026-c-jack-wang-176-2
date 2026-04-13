@@ -4,6 +4,9 @@
 
 #define MAX_ARGS 10
 #define MAX_INPUT_LENGTH 256
+#define STATE_SPACE 0
+#define STATE_QUOTE 2
+#define STATE_WORD  1
 
 int shell_parse(char *buf, char *argv[]);
 void execute_command(int argc, char *argv[]);
@@ -56,12 +59,31 @@ int main(void)
 int shell_parse(char *buf, char *argv[])
 {
     int argc = 0;
-    int state = 0;
-    // TODO: 在这里添加你的代码，完成命令行解析
-    // 功能：将输入字符串buf按空格分割成多个参数，存入argv数组
-    // 返回： 参数个数argc
-    // 提示：使用状态机的方式处理，注意处理字符串结束符
-    // I AM NOT DONE
+    int state = STATE_SPACE;
+    while(*buf != '\0'){
+        if(state == STATE_SPACE){
+            if(*buf== '\t'|| *buf == ' '){
+            }else if(*buf == '"'){
+                state = STATE_QUOTE;
+                argv[argc++] = buf+1;
+            }else{
+                state = STATE_WORD;
+                argv[argc++] = buf;
+            }
+        }else if(state == STATE_WORD){
+            if(*buf == ' '||*buf == '\t') {
+                *buf = '\0';
+                state =STATE_SPACE;
+            }
+        }else if(state == STATE_QUOTE){
+            if(*buf == '"'){
+                state = STATE_SPACE;
+                *(buf+1) = '\0';
+            }
+        }
+        buf++;
+    }
+    argv[argc] = NULL;
     return argc;
 }
 

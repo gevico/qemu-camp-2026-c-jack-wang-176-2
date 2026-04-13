@@ -2,6 +2,11 @@
 #include <stdlib.h>
 #include <string.h>
 
+#define TYPE_INT 1
+#define TYPE_FLOAT 2
+#define TYPE_STRING 3
+
+
 typedef int (*CompareFunc)(const void *, const void *);
 
 int compareInt(const void *a, const void *b) {
@@ -35,13 +40,46 @@ void processFile(const char *filename) {
         return;
     }
 
-    if (n > 20) n = 20;  // 最多支持20个元素
+    if (n > 20) n = 20; 
 
     printf("=== 处理数据来自: %s ===\n", filename);
 
     switch (choice) {
-        // TODO: 在这里添加你的代码
-        // I AM NOT DONE
+        case TYPE_INT:{
+            int contain[20];
+            for(int i =0;i<n;i++){
+                fscanf(fin,"%d",&contain[i]);
+            }
+            sort(contain,n,sizeof(int),compareInt);
+            for(int i =0;i<n;i++){
+                printf("%d ",contain[i]);
+            }
+            break;
+        }
+        case TYPE_FLOAT:{
+            float contain[20];
+            for(int i =0;i<n;i++){
+                fscanf(fin,"%f",&contain[i]);
+            }
+            sort(contain,n,sizeof(float),compareFloat);
+            for(int i =0;i<n;i++){
+                printf("%f",contain[i]);
+            }
+            break;
+        }
+        case TYPE_STRING:{
+            char contain[20][50];
+            char* arr[20];
+            for(int i =0;i<n;i++){
+                fscanf(fin,"%49s",contain[i]);
+                arr[i] = contain[i];
+            }
+            sort(arr,n,sizeof(char*),compareString);
+            for(int i= 0;i<n;i++){
+                printf("%19s",arr[i]);
+            }
+            break;
+        }
     }
 
     fclose(fin);
