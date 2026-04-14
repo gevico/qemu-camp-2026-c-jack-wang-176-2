@@ -20,8 +20,8 @@ typedef struct {
 
 // 方向数组：为了匹配预期路径，我们需要特定的探索顺序
 // 栈是后进先出，所以如果我们想先探索“下”和“右”，需要后压入它们
-int dr[] = {-1, 0, 1, 0}; // 上, 左, 下, 右
-int dc[] = {0, -1, 0, 1};
+int dr[] = {0, 1, 0, -1}; 
+int dc[] = {1, 0, -1, 0};
 
 typedef struct {
     Point data[MAX_MATRIC];
@@ -69,7 +69,7 @@ bool dfs(Point start, Point end) {
             path[path_len++] = start;
 
             // 严格从 0 到 path_len-1 反向打印，确保输出顺序为：起点 -> 终点
-            for (int i = path_len - 1; i >= 0; i--) {
+            for (int i = 0; i < path_len; i++) {
                 printf("(%d, %d)\n", path[i].r, path[i].c);
             }
             return true;
