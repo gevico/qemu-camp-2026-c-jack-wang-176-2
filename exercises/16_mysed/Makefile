@@ -6,9 +6,12 @@ SRCS := 16_mysed.c
 OBJS := $(SRCS:.c=.o)
 
 all: $(TARGET)
+$(TARGET): $(OBJS)
+	$(CC) $(CFLAGS) -o $@ $^
 
-# TODO: 在这里添加你的代码
-# I AM NOT DONE
+%.o: %.c
+	$(CC) $(CFLAGS) -c $< -o $@
+
 
 clean:
 	rm -f $(TARGET) $(OBJS)
