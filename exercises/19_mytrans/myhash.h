@@ -24,5 +24,5 @@ int hash_table_insert(HashTable *table, const char *key, const char *value);
 const char* hash_table_lookup(HashTable *table, const char *key);
 
 int load_dictionary(const char *filename, HashTable *table, uint64_t* dict_count);
-
+void to_lowercase(char *str);
 #endif

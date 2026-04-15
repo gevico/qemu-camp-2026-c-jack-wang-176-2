@@ -4,6 +4,7 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
+#include <cstddef>
 
 void to_lowercase(char *str) {
   for (; *str; ++str)
@@ -40,10 +41,20 @@ int main() {
     if (strlen(line) == 0) {
         continue;
     }
-
-    // 使用 strtok 按空格分割单词
-    // TODO: 在这里添加你的代码
-    // I AM NOT DONE
+    char* word = strtok(line," ");
+    if(word != NULL){
+      char copy[256];
+      strncpy(copy,word,sizeof(copy));
+      copy[sizeof(copy)-1] = '\0';
+      to_lowercase(copy);
+      const char *value =hash_table_lookup(table, copy);
+      if (value!= NULL){
+        printf("%s",value);
+      }else{
+        printf("%s",copy);
+      }
+      word = strtok(NULL," ");
+    }
   }
 
   free_hash_table(table);
