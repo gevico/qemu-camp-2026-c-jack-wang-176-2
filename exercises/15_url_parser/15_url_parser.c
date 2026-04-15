@@ -10,6 +10,9 @@
  */
 
 int parse_url(const char* url) {
+    if (url == NULL) {
+        return -EINVAL; 
+    }
     int err = 0;
     char* temp_url =strdup(url);
     if(temp_url == NULL){
