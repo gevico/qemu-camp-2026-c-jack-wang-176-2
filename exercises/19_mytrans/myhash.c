@@ -48,6 +48,7 @@ void free_hash_table(HashTable *table) {
   free(table);
 }
 
+
 // 插入键值对
 int hash_table_insert(HashTable *table, const char *key, const char *value) {
   if (!table || !key || !value)
@@ -58,8 +59,15 @@ int hash_table_insert(HashTable *table, const char *key, const char *value) {
 
   while(node!= NULL){
     if(strcmp(node->key,key)==0){
-      free(node->value);
-      node->value = strdup(value);
+      size_t total_len = strlen(node->value)+strlen(value)+2;
+      char* new_value = (char*)malloc(total_len);
+      if(new_value){
+        strcpy(new_value,node->value);
+        strcat(new_value,"@");
+        strcat(new_value,value);
+        free(node->value);
+        node->value = new_value;
+      }
       return 1;
     }
     node = node->next;
