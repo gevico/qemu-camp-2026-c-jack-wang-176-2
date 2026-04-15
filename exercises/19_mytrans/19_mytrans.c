@@ -42,7 +42,7 @@ int main() {
         continue;
     }
     char* word = strtok(line," ");
-    if(word != NULL){
+    while(word != NULL){
       char copy[256];
       strncpy(copy,word,sizeof(copy));
       copy[sizeof(copy)-1] = '\0';

@@ -8,7 +8,7 @@
 
 void trim(char *str) {
     if(!str) return;
-    char* end = str + strlen(str)+1;
+    char* end = str + strlen(str)-1;
     char* start = str;
     while(end>str&&isspace(*end)){
       *end = '\0';
@@ -18,7 +18,7 @@ void trim(char *str) {
       start ++;
     }
     if(start!= str){
-      memmove(str,start,strlen(str)+1);
+      memmove(str,start,strlen(start)+1);
     }
 }
 
@@ -41,11 +41,11 @@ int load_dictionary(const char *filename, HashTable *table,
     if(in_entry ==0){
       strncpy(current_word,line,sizeof(current_word)-1);
       current_word[sizeof(current_word)-1]= '\0';
-      for(char* p = current_word;*p;p++)to_lowercase(p);
+      to_lowercase(current_word);
       in_entry = 1;
     }else if(in_entry == 1){
       strncpy(current_translation,line,sizeof(current_translation)-1);
-      current_translation[sizeof(current_translation)-1];
+      current_translation[sizeof(current_translation)-1]= '\0';
       hash_table_insert(table,current_word, current_translation);
       if(dict_count)(*dict_count)++;
       in_entry = 0;
