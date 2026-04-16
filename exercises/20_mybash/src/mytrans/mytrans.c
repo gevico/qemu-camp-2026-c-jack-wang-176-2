@@ -70,12 +70,12 @@ int __cmd_mytrans(const char* filename) {
 
   printf("=== 哈希表版英语翻译器（支持百万级数据）===\n");
   uint64_t dict_count = 0;
-  if (load_dictionary("/workspace/exercises/20_mybash/src/mytrans/dict.txt", table, &dict_count) != 0) {
+  if (load_dictionary("src/mytrans/dict.txt", table, &dict_count) != 0) {
     fprintf(stderr, "加载词典失败，请确保 dict.txt 存在。\n");
     free_hash_table(table);
     return 1;
   }
-  printf("词典加载完成，共计%lld词条。\n", dict_count);
+  printf("词典加载完成，共计%lu词条。\n", dict_count);
 
   FILE* file = fopen(filename, "r");
   if (file == NULL) {
