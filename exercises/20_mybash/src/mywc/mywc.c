@@ -1,4 +1,5 @@
 #include "mywc.h"
+#include <string.h>
 
 // 创建哈希表
 WordCount **wc_create_hash_table() {
@@ -25,18 +26,33 @@ char to_lower(char c) { return tolower(c); }
 void add_word(WordCount **hash_table, const char *word) {
   unsigned int index = hash(word);
   WordCount *entry = hash_table[index];
+  while(entry){
+    if(strcmp(entry->word,word)==0){
+      entry->count++;
+      return;
+    }
+    entry = entry->next;
+  }
+  WordCount *new_node = (WordCount*)malloc(sizeof(WordCount));
+  new_node->count = 1;
+  strncpy(new_node->word,word,MAX_WORD_LEN-1);
+  new_node->word[MAX_WORD_LEN-1]= '\0';
+  new_node->next = hash_table[index];
+  hash_table[index] = new_node;
 
-    // TODO: 在这里添加你的代码
-    // I AM NOT DONE
 }
 
 // 打印单词统计结果
 void print_word_counts(WordCount **hash_table) {
   printf("Word Count Statistics:\n");
   printf("======================\n");
-
-    // TODO: 在这里添加你的代码
-    // I AM NOT DONE
+  for(int i = 0;i<HASH_SIZE;i++){
+    WordCount* cur = hash_table[i];
+    while(cur != NULL){
+      printf("%-20s %d\n", cur->word, cur->count);
+      cur = cur ->next;
+    }
+  }
 }
 
 // 释放哈希表内存

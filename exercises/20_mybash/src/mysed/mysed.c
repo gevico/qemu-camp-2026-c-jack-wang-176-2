@@ -1,4 +1,5 @@
 #include "mysed.h"
+#include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -10,11 +11,24 @@ int parse_replace_command(const char* cmd, char** old_str, char** new_str) {
     }
     
     // 初始化输出参数
-    *old_str = NULL;
-    *new_str = NULL;
     
-    // TODO: 在这里添加你的代码
-    // I AM NOT DONE
+    if(cmd[0]!='s'||cmd[1]!='/'){
+        const char* start_old = cmd +2;
+        const char* end_old = strchr(cmd,'/');
+        const char* start_new = start_old +1;
+        const char* end_new = strchr(start_new,'/');
+        if(!end_old||!start_new||!end_new){
+            return -1;
+        }
+        size_t new_len = end_new - start_new;
+        size_t old_len = end_old - end_new;
+        strncpy(*old_str,start_old,old_len);
+        (*old_str)[old_len] = '\0';
+        strncpy(*new_str,start_new,new_len);
+        (*new_str)[new_len] = '\0';
+    }else{
+        return -1;
+    }
 
     return 0;
 }
@@ -24,9 +38,13 @@ void replace_first_occurrence(char* str, const char* old, const char* new) {
     if (!str || !old || !new) {
         return;
     }
-    
-    // TODO: 在这里添加你的代码
-    // I AM NOT DONE
+    char* pos = strstr(str,old);
+    if(!pos)return;
+    size_t new_len = strlen(new);
+    size_t old_len = strlen(old);
+    size_t tail_len = strlen(pos+old_len)+1;
+    memmove(pos+new_len,pos+old_len,tail_len);
+    memcpy(pos,new,tail_len);    
 }
 
 int __cmd_mysed(const char* rules, const char* str) {

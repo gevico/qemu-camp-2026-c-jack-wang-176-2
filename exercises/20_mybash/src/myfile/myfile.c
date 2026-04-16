@@ -38,9 +38,24 @@ int __cmd_myfile(const char* filename) {
     fflush(stdout);
     printf("filepath: %s\n", filepath);
 
-    // TODO: 在这里添加你的代码
-    // I AM NOT DONE
+    fd = open(filepath,O_RDONLY);
+    if(fd<0){
+      perror("fail to open file");
+      close(fd);
+      return -1;
+    }
 
+    ssize_t file_content = read(fd,&ehdr);
+    if (file_content<0){
+      perror("fail to read from file");
+      close(fd);
+      return -1;
+    }
+    if((memcpy(ehdr.e_ident,ELFMAG, SELFMAG))!=0){
+      perror("fail to match");
+      close(fd);
+      return -1;
+    }
     print_elf_type(ehdr.e_type);
     close(fd);
     return 0;

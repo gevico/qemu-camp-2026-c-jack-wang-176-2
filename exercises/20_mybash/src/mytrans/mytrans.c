@@ -7,8 +7,19 @@
 #include <string.h>
 
 void trim(char *str) {
-    // TODO: 在这里添加你的代码
-    // I AM NOT DONE
+    if(!str)return;
+    char* end = str + strlen(str)-1;
+    char* start = str;
+    if(end>str&&isspace(*end)){
+      *end ='\0';
+      end--;
+    }
+    if(start<end&&isspace(*start)){
+      start++;
+    }
+    if(start != end){
+      memmove(start,str,strlen(start)+1);
+    }
 }
 
 int load_dictionary(const char *filename, HashTable *table,
@@ -24,8 +35,21 @@ int load_dictionary(const char *filename, HashTable *table,
   char current_translation[1024] = {0};
   int in_entry = 0;
 
-    // TODO: 在这里添加你的代码
-    // I AM NOT DONE
+  while(fgets(line,sizeof(line),file)){
+    trim(line);
+    if(strlen(line)==0)continue;
+    if(line[0]=='#'){
+      strncpy(current_word,line+1,sizeof(current_word)-1);
+      current_word[sizeof(current_word)-1]='\0';
+      to_lower(current_word);
+    }else if(strncmp(line,"Trans:",6)==0){
+      strncpy(current_translation,line+1,sizeof(current_translation)-1);
+      current_translation[sizeof(current_translation)-1]='\0';
+      hash_table_insert(table, current_word, current_translation);
+      if(dict_count)dict_count++;
+    }
+  
+  }
 
   fclose(file);
   return 0;
@@ -50,7 +74,7 @@ int __cmd_mytrans(const char* filename) {
     free_hash_table(table);
     return 1;
   }
-  printf("词典加载完成，共计%ld词条。\n", dict_count);
+  printf("词典加载完成，共计%lld词条。\n", dict_count);
 
   FILE* file = fopen(filename, "r");
   if (file == NULL) {

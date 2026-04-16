@@ -1,7 +1,7 @@
 // hash_table.c
 #include "myhash.h"
 #include <stdio.h>
-#include <stdlib.h>
+#include <stdlib.h> 
 #include <string.h>
 
 // djb2 哈希函数（经典字符串哈希，分布均匀）
@@ -56,9 +56,26 @@ int hash_table_insert(HashTable *table, const char *key, const char *value) {
   unsigned long hash = hash_function(key) % HASH_TABLE_SIZE;
   HashNode *node = table->buckets[hash];
 
-    // TODO: 在这里添加你的代码
-    // I AM NOT DONE
-
+  while(!node){
+    if(strcmp(node->key,key)==0){
+      size_t total_len = strlen(value)+strlen(node->value)+2;
+      char* new_value = (char*)malloc(total_len);
+      if(!new_value) continue;
+      strcpy(new_value,node->value);
+      strcat(new_value,"@");
+      strcat(new_value,value);
+      free(node->value);
+      node->value = new_value;
+      return 1;
+    }
+    node = node->next;
+  }
+  HashNode* new_node = (HashNode*)malloc(sizeof(HashNode));
+  if(!new_node)return 0;
+  new_node->key = strdup(key);
+  new_node->value = strdup(value);
+  new_node->next = table[hash];
+  table[hash] = new_node;
   return 1;
 }
 
@@ -70,8 +87,14 @@ const char *hash_table_lookup(HashTable *table, const char *key) {
   unsigned long hash = hash_function(key) % HASH_TABLE_SIZE;
   HashNode *node = table->buckets[hash];
 
-    // TODO: 在这里添加你的代码
-    // I AM NOT DONE
+  const char* target;
+  while(!node){
+    if(strcmp(node->key, key)==0){
+      target = node->value;
+      return target;
+    }
+    node = node->next;
+  }
 
   return NULL; // 未找到
 }

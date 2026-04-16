@@ -23,7 +23,7 @@ void trim(char *str) {
     }
 }
 
-// （可以完全废除原本基于 > 127 的 is_translation 判断）
+
 
 int load_dictionary(const char *filename, HashTable *table,
                     uint64_t *dict_count) {

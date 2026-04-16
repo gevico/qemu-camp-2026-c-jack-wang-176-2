@@ -4,14 +4,12 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
-#include "common.h"
+#include "../../include/common.h"
 
 #define MAX_INPUT 1024
 #define MAX_ARGS 64
 
-// ======================
-// 自定义命令系统
-// ======================
+
 
 // 函数指针类型定义
 typedef int (*cmd_func_0_t)(void);
@@ -20,8 +18,8 @@ typedef int (*cmd_func_2_t)(const char*, const char*);
 
 // 命令结构体
 typedef struct {
-    const char *name;             // 命令名，如 "myfile"
-    int is_arg_required;          // 是否需要参数：1 需要，0 不需要
+    const char *name;            
+    int is_arg_required;         
     union {
         cmd_func_0_t func_0;      // 无参数函数
         cmd_func_1_t func_1;      // 带一个 const char* 参数的函数
@@ -57,10 +55,14 @@ void execute_exit() { exit(0); }
 int is_builtin_command(char **args) {
   if (args[0] == NULL)
     return 0;
-
-  // TODO: 在这里添加你的代码
-  // I AM NOT DONE
-
+  if(strcmp(args[0],"cd")==0){
+    execute_cd(args);
+    return 1;
+  }else if(strcmp(args[0],"exit")==0){
+    execute_exit();
+    return 1;
+  }
+  
   return 0;
 }
 
@@ -76,10 +78,15 @@ int parse_input(char *input, char **args) {
 
   while (*buf != '\0' && i < MAX_ARGS - 1) {
       char c = *buf;
-
-        // TODO: 在这里添加你的代码
-        // I AM NOT DONE
-
+      if(!in_quotes&&(c==' '||c=='\t')){
+        arg_buf[arg_buf_idx] = '\0';
+        args[i++] = strdup(arg_buf);
+        arg_buf_idx = 0;
+      }else if(c == '"'){
+        in_quotes = !in_quotes;
+      }else{
+        arg_buf[arg_buf_idx++] = c;
+      }
       buf++;
   }
 

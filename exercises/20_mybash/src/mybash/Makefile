@@ -10,7 +10,7 @@ BINDIR ?= ./bin
 # 中间文件目录（比如 ./obj/src/mybash/）
 OBJDIR ?= ./obj
 LINKLIBS ?= -L../../obj/mysed -L../../obj/mywc -L../../obj/mytrans -L../../obj/myfile
-
+LDLIBS := -lmysed -lmywc -lmytrans -lmyfile -lelf
 # 源文件
 SRCS := main.c
 OBJS := $(SRCS:.c=.o)
@@ -21,8 +21,12 @@ TARGET_PATH := $(BINDIR)/$(TARGET)
 
 all: $(TARGET_PATH)
 
-# TODO: 在这里添加你的代码
-# I AM NOT DONE
+$(TARGET_PATH): $(OBJS)
+	@mkdir -p $(dir $@)
+	$(CC) $(CFLAGS) $^ -o $@ $(LINKLIBS) $(LDLIBS)
+$(OBJDIR)/%.o: %.c
+	@mkdir -p $(dir $@)
+	$(CC) $(CFLAGS) -c $< -o $@
 
 clean:
 	@rm -rf $(OBJDIR)/*.o $(TARGET_PATH)
