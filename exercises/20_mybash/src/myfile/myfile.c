@@ -51,7 +51,7 @@ int __cmd_myfile(const char* filename) {
       close(fd);
       return -1;
     }
-    if((memcpy(ehdr.e_ident,ELFMAG, SELFMAG))!=0){
+    if((memcmp(ehdr.e_ident,ELFMAG, SELFMAG))!=0){
       perror("fail to match");
       close(fd);
       return -1;

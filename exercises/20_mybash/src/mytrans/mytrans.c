@@ -19,7 +19,7 @@ void trim(char *str) {
       start++;
     }
     if(start != str){
-      memmove(start,str,strlen(start)+1);
+      memmove(str,start,strlen(start)+1);
     }
 }
 

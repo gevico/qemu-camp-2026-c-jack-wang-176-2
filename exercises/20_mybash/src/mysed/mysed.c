@@ -15,7 +15,7 @@ int parse_replace_command(const char* cmd, char** old_str, char** new_str) {
     if(cmd[0]=='s'||cmd[1]=='/'){
         const char* start_old = cmd +2;
         const char* end_old = strchr(start_old,'/');
-        const char* start_new = start_old +1;
+        const char* start_new = end_old +1;
         const char* end_new = strchr(start_new,'/');
         if(!end_old||!start_new||!end_new){
             return -1;
