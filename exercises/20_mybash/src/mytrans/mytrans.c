@@ -6,18 +6,19 @@
 #include <stdlib.h>
 #include <string.h>
 
+void to_lowercase(char *str);
 void trim(char *str) {
     if(!str)return;
     char* end = str + strlen(str)-1;
     char* start = str;
-    if(end>str&&isspace(*end)){
+    while(end>str&&isspace(*end)){
       *end ='\0';
       end--;
     }
-    if(start<end&&isspace(*start)){
+    while(start<end&&isspace(*start)){
       start++;
     }
-    if(start != end){
+    if(start != str){
       memmove(start,str,strlen(start)+1);
     }
 }
@@ -41,12 +42,12 @@ int load_dictionary(const char *filename, HashTable *table,
     if(line[0]=='#'){
       strncpy(current_word,line+1,sizeof(current_word)-1);
       current_word[sizeof(current_word)-1]='\0';
-      to_lower(current_word);
+      to_lowercase(current_word);
     }else if(strncmp(line,"Trans:",6)==0){
-      strncpy(current_translation,line+1,sizeof(current_translation)-1);
+      strncpy(current_translation,line+6,sizeof(current_translation)-1);
       current_translation[sizeof(current_translation)-1]='\0';
       hash_table_insert(table, current_word, current_translation);
-      if(dict_count)dict_count++;
+      if(dict_count)(*dict_count)++;
     }
   
   }

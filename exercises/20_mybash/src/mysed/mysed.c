@@ -12,7 +12,7 @@ int parse_replace_command(const char* cmd, char** old_str, char** new_str) {
     
     // 初始化输出参数
     
-    if(cmd[0]!='s'||cmd[1]!='/'){
+    if(cmd[0]=='s'||cmd[1]=='/'){
         const char* start_old = cmd +2;
         const char* end_old = strchr(cmd,'/');
         const char* start_new = start_old +1;
@@ -44,7 +44,7 @@ void replace_first_occurrence(char* str, const char* old, const char* new) {
     size_t old_len = strlen(old);
     size_t tail_len = strlen(pos+old_len)+1;
     memmove(pos+new_len,pos+old_len,tail_len);
-    memcpy(pos,new,tail_len);    
+    memcpy(pos,new,new_len);    
 }
 
 int __cmd_mysed(const char* rules, const char* str) {

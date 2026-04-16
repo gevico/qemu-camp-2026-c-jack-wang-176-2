@@ -56,7 +56,7 @@ int hash_table_insert(HashTable *table, const char *key, const char *value) {
   unsigned long hash = hash_function(key) % HASH_TABLE_SIZE;
   HashNode *node = table->buckets[hash];
 
-  while(!node){
+  while(node){
     if(strcmp(node->key,key)==0){
       size_t total_len = strlen(value)+strlen(node->value)+2;
       char* new_value = (char*)malloc(total_len);
@@ -74,8 +74,8 @@ int hash_table_insert(HashTable *table, const char *key, const char *value) {
   if(!new_node)return 0;
   new_node->key = strdup(key);
   new_node->value = strdup(value);
-  new_node->next = table[hash];
-  table[hash] = new_node;
+  new_node->next = table.buckets[hash];
+  table.buckets[hash] = new_node;
   return 1;
 }
 
@@ -88,7 +88,7 @@ const char *hash_table_lookup(HashTable *table, const char *key) {
   HashNode *node = table->buckets[hash];
 
   const char* target;
-  while(!node){
+  while(node){
     if(strcmp(node->key, key)==0){
       target = node->value;
       return target;
