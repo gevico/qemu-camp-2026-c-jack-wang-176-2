@@ -45,7 +45,7 @@ int __cmd_myfile(const char* filename) {
       return -1;
     }
 
-    ssize_t file_content = read(fd,&ehdr);
+    ssize_t file_content = read(fd,&ehdr,sizeof(ehdr));
     if (file_content<0){
       perror("fail to read from file");
       close(fd);
