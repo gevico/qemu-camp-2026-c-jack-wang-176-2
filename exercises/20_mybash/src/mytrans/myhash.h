@@ -5,8 +5,14 @@
 #include "../../include/common.h"
 
 #include <stdint.h>
+#include <string.h>
+#include <stdlib.h>
+
 #define HASH_TABLE_SIZE 10000003  // 应选一个较大的质数，有利于分布
-char* safe_safe_strdup(const char* s) {
+// 确保这两行必须在文件顶部！
+
+// 加上 static inline，让它成为内联安全函数
+static inline char* safe_strdup(const char* s) {
     if (s == NULL) return NULL;
     size_t len = strlen(s);
     char* dup = (char*)malloc(len + 1);

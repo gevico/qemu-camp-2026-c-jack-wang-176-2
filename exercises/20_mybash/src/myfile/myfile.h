@@ -9,7 +9,12 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-char* safe_safe_strdup(const char* s) {
+// 确保这两行必须在文件顶部！
+
+
+
+// 加上 static inline，让它成为内联安全函数
+static inline char* safe_strdup(const char* s) {
     if (s == NULL) return NULL;
     size_t len = strlen(s);
     char* dup = (char*)malloc(len + 1);
