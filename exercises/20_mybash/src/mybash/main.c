@@ -134,7 +134,14 @@ int main(int argc, char *argv[]) {
       }
 
       // 处理内置命令
-      if (is_builtin_command(args)) {
+     if (is_builtin_command(args)) {
+        // 在 continue 之前，必须把这一轮分配的参数内存释放掉！
+        for (int j = 0; j < argc_parsed; j++) {
+            if (args[j] != NULL) {
+                free(args[j]);
+                args[j] = NULL;
+            }
+        }
         continue;
       }
 

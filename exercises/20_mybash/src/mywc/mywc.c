@@ -16,11 +16,14 @@ unsigned int hash(const char *word) {
   return hash % HASH_SIZE;
 }
 
-// 检查字符是否构成单词的一部分
-bool is_valid_word_char(char c) { return isalpha(c) || c == '\''; }
+// 修改参数类型为 int，并在调用 ctype 函数时强制转换为 (unsigned char)
+bool is_valid_word_char(int c) { 
+    return isalpha((unsigned char)c) || c == '\''; 
+}
 
-// 转换为小写
-char to_lower(char c) { return tolower(c); }
+char to_lower(int c) { 
+    return tolower((unsigned char)c); 
+}
 
 // 添加单词到哈希表
 void add_word(WordCount **hash_table, const char *word) {
