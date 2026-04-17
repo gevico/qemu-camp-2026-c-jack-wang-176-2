@@ -3,7 +3,7 @@
 
 #include <stdio.h>
 
-#include "../../include/common.h"
+#include "common.h"
 
 #define MAX_LINE_LENGTH 1024
 

@@ -1,0 +1,7 @@
+myfile src/mybash/main.c
+mysed s/unix/linux/ "unix is good"
+mywc src/mybash/main.c
+mytrans src/mybash/main.c
+
+myfile
+mysed s/a/b/

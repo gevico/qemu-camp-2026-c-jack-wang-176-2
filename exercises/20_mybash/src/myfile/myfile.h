@@ -1,12 +1,12 @@
 #ifndef __MYFILE_H__
 #define __MYFILE_H__
 
-#include "../../include/common.h"
+#include "common.h"
 
 #include <elf.h>
 #include <fcntl.h>
 #include <stdio.h>
-#include <stdlib.h> 
+#include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
 
