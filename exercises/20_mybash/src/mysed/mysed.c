@@ -12,17 +12,18 @@ int parse_replace_command(const char* cmd, char** old_str, char** new_str) {
     
     // 初始化输出参数
     
-    if(cmd[0]=='s'||cmd[1]=='/'){
+    if(cmd[0]=='s'&&cmd[1]=='/'){
         const char* start_old = cmd +2;
         const char* end_old = strchr(start_old,'/');
+        if(!end_old)return -1;
         const char* start_new = end_old +1;
         const char* end_new = strchr(start_new,'/');
-        if(!end_old||!start_new||!end_new){
+        if(!end_new){
             return -1;
         }
         if (!*old_str || !*new_str) return -1;
         size_t new_len = end_new - start_new;
-        size_t old_len = end_old - start_new;
+        size_t old_len = end_old - start_old;
         *old_str = (char*)malloc(old_len + 1);
         *new_str = (char*)malloc(new_len + 1);
         strncpy(*old_str,start_old,old_len);
