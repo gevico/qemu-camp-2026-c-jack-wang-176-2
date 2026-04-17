@@ -149,19 +149,22 @@ int main(int argc, char *argv[]) {
       for (Command *cmd = commands; cmd->name != NULL; cmd++) {
         if (strcmp(cmd_name, cmd->name) == 0) {
           found = 1;
+          
+          // 防御性编程：检查必要参数是否缺失
           if (cmd->is_arg_required == 1 && cmd_arg1 == NULL) {
-          fprintf(stderr, "mybash: %s requires 1 argument.\n", cmd_name);
-        } else if (cmd->is_arg_required == 2 && (cmd_arg1 == NULL || cmd_arg2 == NULL)) {
-          fprintf(stderr, "mybash: %s requires 2 arguments.\n", cmd_name);
-        } else {
-          if (cmd->is_arg_required == 0) {
-            cmd->func.func_0();
-          } else if (cmd->is_arg_required == 1) {
-            cmd->func.func_1(cmd_arg1);
-          } else if (cmd->is_arg_required == 2) {
-            cmd->func.func_2(cmd_arg1, cmd_arg2);
+            fprintf(stderr, "mybash: %s requires 1 argument.\n", cmd_name);
+          } else if (cmd->is_arg_required == 2 && (cmd_arg1 == NULL || cmd_arg2 == NULL)) {
+            fprintf(stderr, "mybash: %s requires 2 arguments.\n", cmd_name);
+          } else {
+            // 参数齐全，执行命令
+            if (cmd->is_arg_required == 0) {
+              cmd->func.func_0();
+            } else if (cmd->is_arg_required == 1) {
+              cmd->func.func_1(cmd_arg1);
+            } else if (cmd->is_arg_required == 2) {
+              cmd->func.func_2(cmd_arg1, cmd_arg2);
+            }
           }
-        }
           break;
         }
       }
@@ -175,7 +178,7 @@ int main(int argc, char *argv[]) {
     return 0;
   } 
   else {
-    // 🔁 原有的交互式命令行模式
+    // 🔁 交互式命令行模式
     while (1) {
       printf("mybash$ ");
       fflush(stdout);
@@ -187,9 +190,9 @@ int main(int argc, char *argv[]) {
 
       input[strcspn(input, "\n")] = '\0';
 
-      int argc = parse_input(input, args);
+      int argc_parsed = parse_input(input, args);
 
-      if (argc == 0) {
+      if (argc_parsed == 0) {
         continue;
       }
 
@@ -198,18 +201,28 @@ int main(int argc, char *argv[]) {
       }
 
       const char *cmd_name = args[0];
-      const char *cmd_arg = (argc >= 2) ? args[1] : NULL;
+      const char *cmd_arg1 = (argc_parsed >= 2) ? args[1] : NULL;
+      const char *cmd_arg2 = (argc_parsed >= 3) ? args[2] : NULL;
 
       int found = 0;
       for (Command *cmd = commands; cmd->name != NULL; cmd++) {
         if (strcmp(cmd_name, cmd->name) == 0) {
           found = 1;
-          if (cmd->is_arg_required == 0) {
-            cmd->func.func_0();
-          } else if (cmd->is_arg_required == 1) {
-            cmd->func.func_1(cmd_arg);
-          } else if (cmd->is_arg_required == 2) {
-            cmd->func.func_2(cmd_arg, cmd_arg);
+          
+         
+          if (cmd->is_arg_required == 1 && cmd_arg1 == NULL) {
+            fprintf(stderr, "mybash: %s requires 1 argument.\n", cmd_name);
+          } else if (cmd->is_arg_required == 2 && (cmd_arg1 == NULL || cmd_arg2 == NULL)) {
+            fprintf(stderr, "mybash: %s requires 2 arguments.\n", cmd_name);
+          } else {
+            
+            if (cmd->is_arg_required == 0) {
+              cmd->func.func_0();
+            } else if (cmd->is_arg_required == 1) {
+              cmd->func.func_1(cmd_arg1);
+            } else if (cmd->is_arg_required == 2) {
+              cmd->func.func_2(cmd_arg1, cmd_arg2); 
+            }
           }
           break;
         }

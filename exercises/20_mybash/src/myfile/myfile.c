@@ -30,6 +30,10 @@ void print_elf_type(uint16_t e_type) {
 }
 
 int __cmd_myfile(const char* filename) {
+  if (filename == NULL) {
+        fprintf(stderr, "Error: filename cannot be NULL\n");
+        return 1;
+    }
     char filepath[256];
     int fd;
     Elf64_Ehdr ehdr;
