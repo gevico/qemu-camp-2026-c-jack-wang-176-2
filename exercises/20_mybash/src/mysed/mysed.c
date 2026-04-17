@@ -26,6 +26,7 @@ int parse_replace_command(const char* cmd, char** old_str, char** new_str) {
         size_t old_len = end_old - start_old;
         *old_str = (char*)malloc(old_len + 1);
         *new_str = (char*)malloc(new_len + 1);
+        if(*new_str == NULL||*old_str == NULL)return -1;
         strncpy(*old_str,start_old,old_len);
         (*old_str)[old_len] = '\0';
         strncpy(*new_str,start_new,new_len);

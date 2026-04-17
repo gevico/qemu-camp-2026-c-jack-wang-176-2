@@ -38,7 +38,8 @@ int __cmd_myfile(const char* filename) {
     int fd;
     Elf64_Ehdr ehdr;
 
-    strcpy(filepath, filename);
+    strncpy(filepath, filename, sizeof(filepath) - 1);
+    filepath[sizeof(filepath) - 1] = '\0';
     fflush(stdout);
     printf("filepath: %s\n", filepath);
 

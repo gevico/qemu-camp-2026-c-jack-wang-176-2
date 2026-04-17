@@ -37,6 +37,7 @@ void add_word(WordCount **hash_table, const char *word) {
     entry = entry->next;
   }
   WordCount *new_node = (WordCount*)malloc(sizeof(WordCount));
+  if(!new_node)return;
   new_node->count = 1;
   strncpy(new_node->word,word,MAX_WORD_LEN-1);
   new_node->word[MAX_WORD_LEN-1]= '\0';
