@@ -8,18 +8,23 @@
 
 void to_lowercase(char *str);
 void trim(char *str) {
-    if(!str||*str=='\0')return;
-    char* end = str + strlen(str)-1;
+    if(!str || *str == '\0') return;
+    char* end = str + strlen(str) - 1;
     char* start = str;
-    while(end>=str&&isspace(*end)){
-      *end ='\0';
+    
+    // 【关键修复】：强制转换为 (unsigned char) 消除负数越界危险
+    while(end >= str && isspace((unsigned char)*end)){
+      *end = '\0';
       end--;
     }
-    while(*start&&isspace(*start)){
+    
+    // 【关键修复】：强制转换为 (unsigned char) 消除负数越界危险
+    while(*start && isspace((unsigned char)*start)){
       start++;
     }
+    
     if(start != str){
-      memmove(str,start,strlen(start)+1);
+      memmove(str, start, strlen(start) + 1);
     }
 }
 
