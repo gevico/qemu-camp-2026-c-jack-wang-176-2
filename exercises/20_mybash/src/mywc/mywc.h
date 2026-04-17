@@ -24,7 +24,7 @@ unsigned int hash(const char *word);
 void add_word(WordCount **hash_table, const char *word);
 void print_word_counts(WordCount **hash_table);
 void wc_free_hash_table(WordCount **hash_table);
-bool is_valid_word_char(char c);
-char to_lower(char c);
+bool is_valid_word_char(int c);
+char to_lower(int c);
 
 #endif //! EXERCISE_18_MYWC_H
