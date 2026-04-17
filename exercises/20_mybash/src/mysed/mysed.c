@@ -45,6 +45,10 @@ void replace_first_occurrence(char* str, const char* old, const char* new) {
     if(!pos)return;
     size_t new_len = strlen(new);
     size_t old_len = strlen(old);
+    size_t current_len = strlen(str);
+    if (current_len - old_len + new_len >= 4095) {
+        return; 
+    }
     size_t tail_len = strlen(pos+old_len)+1;
     memmove(pos+new_len,pos+old_len,tail_len);
     memcpy(pos,new,new_len);    
@@ -77,7 +81,7 @@ int __cmd_mysed(const char* rules, const char* str) {
     }
 
     // 复制原始字符串，因为我们可能会修改它（避免修改输入参数）
-    char line[1024];
+    char line[4096];
     strncpy(line, str, sizeof(line) - 1);
     line[sizeof(line) - 1] = '\0';  // 确保终止
 

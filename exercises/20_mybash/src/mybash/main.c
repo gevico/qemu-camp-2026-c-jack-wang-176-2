@@ -87,7 +87,9 @@ int parse_input(char *input, char **args) {
       }else if(c == '"'){
         in_quotes = !in_quotes;
       }else{
-        arg_buf[arg_buf_idx++] = c;
+       if (arg_buf_idx < MAX_INPUT - 1) {
+            arg_buf[arg_buf_idx++] = c;
+        }
       }
       buf++;
   }
@@ -172,6 +174,11 @@ int main(int argc, char *argv[]) {
       if (!found) {
         fprintf(stderr, "mybash: command not found: %s\n", cmd_name);
       }
+      for (int j = 0; j < argc_parsed; j++) {
+          if (args[j] != NULL) {
+              free(args[j]);
+          }
+      }
     }
 
     fclose(file);
@@ -230,6 +237,11 @@ int main(int argc, char *argv[]) {
 
       if (!found) {
         fprintf(stderr, "mybash: command not found: %s\n", cmd_name);
+      }
+      for (int j = 0; j < argc_parsed; j++) {
+          if (args[j] != NULL) {
+              free(args[j]);
+          }
       }
     }
   }
