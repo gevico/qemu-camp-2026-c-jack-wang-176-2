@@ -21,7 +21,7 @@ int parse_replace_command(const char* cmd, char** old_str, char** new_str) {
         if(!end_new){
             return -1;
         }
-        if (!*old_str || !*new_str) return -1;
+        
         size_t new_len = end_new - start_new;
         size_t old_len = end_old - start_old;
         *old_str = (char*)malloc(old_len + 1);
@@ -31,11 +31,9 @@ int parse_replace_command(const char* cmd, char** old_str, char** new_str) {
         strncpy(*new_str,start_new,new_len);
         (*new_str)[new_len] = '\0';
         return 0;
-    }else{
-        return -1;
     }
+      return -1;
 
-    return 0;
 }
 
 void replace_first_occurrence(char* str, const char* old, const char* new) {

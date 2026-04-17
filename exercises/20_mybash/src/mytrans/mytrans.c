@@ -11,11 +11,11 @@ void trim(char *str) {
     if(!str||*str=='\0')return;
     char* end = str + strlen(str)-1;
     char* start = str;
-    while(end>str&&isspace(*end)){
+    while(end>=str&&isspace(*end)){
       *end ='\0';
       end--;
     }
-    while(start<end&&isspace(*start)){
+    while(*start&&isspace(*start)){
       start++;
     }
     if(start != str){
@@ -34,7 +34,7 @@ int load_dictionary(const char *filename, HashTable *table,
   char line[1024];
   char current_word[100] = {0};
   char current_translation[1024] = {0};
-  int in_entry = 0;
+  
 
   while(fgets(line,sizeof(line),file)){
     trim(line);
@@ -62,6 +62,7 @@ void to_lowercase(char *str) {
 }
 
 int __cmd_mytrans(const char* filename) {
+  if (!filename) return 1;
   HashTable *table = create_hash_table();
   if (!table) {
     fprintf(stderr, "无法创建哈希表\n");

@@ -149,6 +149,11 @@ int main(int argc, char *argv[]) {
       for (Command *cmd = commands; cmd->name != NULL; cmd++) {
         if (strcmp(cmd_name, cmd->name) == 0) {
           found = 1;
+          if (cmd->is_arg_required == 1 && cmd_arg1 == NULL) {
+          fprintf(stderr, "mybash: %s requires 1 argument.\n", cmd_name);
+        } else if (cmd->is_arg_required == 2 && (cmd_arg1 == NULL || cmd_arg2 == NULL)) {
+          fprintf(stderr, "mybash: %s requires 2 arguments.\n", cmd_name);
+        } else {
           if (cmd->is_arg_required == 0) {
             cmd->func.func_0();
           } else if (cmd->is_arg_required == 1) {
@@ -156,6 +161,7 @@ int main(int argc, char *argv[]) {
           } else if (cmd->is_arg_required == 2) {
             cmd->func.func_2(cmd_arg1, cmd_arg2);
           }
+        }
           break;
         }
       }
