@@ -8,7 +8,7 @@
 
 void to_lowercase(char *str);
 void trim(char *str) {
-    if(!str)return;
+    if(!str||*str=='\0')return;
     char* end = str + strlen(str)-1;
     char* start = str;
     while(end>str&&isspace(*end)){

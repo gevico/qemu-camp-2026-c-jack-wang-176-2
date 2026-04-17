@@ -79,9 +79,11 @@ int parse_input(char *input, char **args) {
   while (*buf != '\0' && i < MAX_ARGS - 1) {
       char c = *buf;
       if(!in_quotes&&(c==' '||c=='\t')){
-        arg_buf[arg_buf_idx] = '\0';
-        args[i++] = strdup(arg_buf);
-        arg_buf_idx = 0;
+        if (arg_buf_idx > 0) { 
+            arg_buf[arg_buf_idx] = '\0';
+            args[i++] = strdup(arg_buf);
+            arg_buf_idx = 0;
+        }
       }else if(c == '"'){
         in_quotes = !in_quotes;
       }else{
