@@ -72,8 +72,8 @@ int hash_table_insert(HashTable *table, const char *key, const char *value) {
   }
   HashNode* new_node = (HashNode*)malloc(sizeof(HashNode));
   if(!new_node)return 0;
-  new_node->key = strdup(key);
-  new_node->value = strdup(value);
+  new_node->key = safe_strdup(key);
+  new_node->value = safe_strdup(value);
   new_node->next = table->buckets[hash];
   table->buckets[hash] = new_node;
   return 1;

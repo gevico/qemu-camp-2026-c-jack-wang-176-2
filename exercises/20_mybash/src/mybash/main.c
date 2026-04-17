@@ -81,7 +81,7 @@ int parse_input(char *input, char **args) {
       if(!in_quotes&&(c==' '||c=='\t')){
         if (arg_buf_idx > 0) { 
             arg_buf[arg_buf_idx] = '\0';
-            args[i++] = strdup(arg_buf);
+            args[i++] = safe_strdup(arg_buf);
             arg_buf_idx = 0;
         }
       }else if(c == '"'){
@@ -97,7 +97,7 @@ int parse_input(char *input, char **args) {
   // 处理最后一个参数（循环结束后可能还有未加入的）
   if (arg_buf_idx > 0) {
       arg_buf[arg_buf_idx] = '\0';
-      args[i++] = strdup(arg_buf);
+      args[i++] = safe_strdup(arg_buf);
   }
 
   args[i] = NULL;  // exec-style NULL结尾

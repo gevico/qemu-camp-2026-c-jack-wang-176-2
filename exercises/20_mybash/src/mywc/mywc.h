@@ -11,7 +11,15 @@
 
 #define MAX_WORD_LEN 128
 #define HASH_SIZE 1000
-
+char* safe_safe_strdup(const char* s) {
+    if (s == NULL) return NULL;
+    size_t len = strlen(s);
+    char* dup = (char*)malloc(len + 1);
+    if (dup != NULL) {
+        strcpy(dup, s);
+    }
+    return dup;
+}
 typedef struct WordCount {
     char word[MAX_WORD_LEN];
     int count;

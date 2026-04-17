@@ -6,7 +6,15 @@
 
 #include <stdint.h>
 #define HASH_TABLE_SIZE 10000003  // 应选一个较大的质数，有利于分布
-
+char* safe_safe_strdup(const char* s) {
+    if (s == NULL) return NULL;
+    size_t len = strlen(s);
+    char* dup = (char*)malloc(len + 1);
+    if (dup != NULL) {
+        strcpy(dup, s);
+    }
+    return dup;
+}
 // 哈希节点
 typedef struct HashNode {
     char *key;              // 英文单词，如 "a", "a.m."
