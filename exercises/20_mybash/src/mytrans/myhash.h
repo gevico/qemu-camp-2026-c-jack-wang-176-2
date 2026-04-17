@@ -2,7 +2,7 @@
 #ifndef HASH_TABLE_H
 #define HASH_TABLE_H
 
-#include "common.h"
+#include "../../include/common.h"
 
 #include <stdint.h>
 #define HASH_TABLE_SIZE 10000003  // 应选一个较大的质数，有利于分布

@@ -3,7 +3,7 @@
 
 #include <stdio.h>
 
-#include "common.h"
+#include "../../include/common.h"
 
 #define MAX_LINE_LENGTH 1024
 char* safe_safe_strdup(const char* s) {

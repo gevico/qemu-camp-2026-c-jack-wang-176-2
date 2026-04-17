@@ -1,7 +1,7 @@
 #ifndef EXERCISE_18_MYWC_H
 #define EXERCISE_18_MYWC_H
 
-#include "common.h"
+#include "../../include/common.h"
 
 #include <stdio.h>
 #include <stdlib.h>
