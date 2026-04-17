@@ -8,7 +8,15 @@
 
 #define MAX_INPUT 1024
 #define MAX_ARGS 64
-
+static inline char* safe_strdup(const char* s) {
+    if (s == NULL) return NULL;
+    size_t len = strlen(s);
+    char* dup = (char*)malloc(len + 1);
+    if (dup != NULL) {
+        strcpy(dup, s);
+    }
+    return dup;
+}
 
 
 // 函数指针类型定义
@@ -76,7 +84,7 @@ int parse_input(char *input, char **args) {
 
   memset(arg_buf, 0, sizeof(arg_buf));
 
-  while (*buf != '\0' && i < MAX_ARGS - 1) {
+  while (*buf != '\0' && i < MAX_ARGS - 2) {
       char c = *buf;
       if(!in_quotes&&(c==' '||c=='\t')){
         if (arg_buf_idx > 0) { 

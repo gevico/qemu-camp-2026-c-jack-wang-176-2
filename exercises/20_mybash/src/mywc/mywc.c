@@ -76,7 +76,7 @@ void process_file(const char *filename) {
   FILE *file = fopen(filename, "r");
   if (!file) {
     perror("Error opening file");
-    exit(EXIT_FAILURE);
+    return;
   }
 
   WordCount **hash_table = wc_create_hash_table();
