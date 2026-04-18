@@ -83,7 +83,6 @@ int parse_input(char *input, char **args) {
   int arg_buf_idx = 0;
 
   memset(arg_buf, 0, sizeof(arg_buf));
-
   while (*buf != '\0' && i < MAX_ARGS - 2) {
       char c = *buf;
       if(!in_quotes&&(c==' '||c=='\t')){
