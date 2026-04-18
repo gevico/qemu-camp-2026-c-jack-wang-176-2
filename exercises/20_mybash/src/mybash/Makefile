@@ -1,7 +1,7 @@
 # src/mybash/Makefile
 
 CC = gcc
-CFLAGS = -Wall -I../../include
+CFLAGS = -Wall -g -fsanitize=address -I../../include
 
 # 可执行文件名
 TARGET := mybash
@@ -15,6 +15,7 @@ LDLIBS := -lmysed -lmywc -lmytrans -lmyfile -lelf
 SRCS := main.c
 OBJS := $(SRCS:.c=.o)
 OBJS := $(patsubst %.o,$(OBJDIR)/%.o,$(OBJS))
+LDFLAGS = -fsanitize=address
 
 # 最终二进制路径
 TARGET_PATH := $(BINDIR)/$(TARGET)
@@ -22,8 +23,9 @@ TARGET_PATH := $(BINDIR)/$(TARGET)
 all: $(TARGET_PATH)
 
 $(TARGET_PATH): $(OBJS)
-	@mkdir -p $(dir $@)
-	$(CC) $(CFLAGS) $^ -o $@ $(LINKLIBS) $(LDLIBS)
+    @mkdir -p $(dir $@)
+    # 将 LDFLAGS 放在对象文件之后，库文件之前
+    $(CC) $(CFLAGS) $^ -o $@ $(LDFLAGS) $(LINKLIBS) $(LDLIBS)
 $(OBJDIR)/%.o: %.c
 	@mkdir -p $(dir $@)
 	$(CC) $(CFLAGS) -c $< -o $@

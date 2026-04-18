@@ -1,7 +1,7 @@
 # src/myfile/Makefile
 
 CC = gcc
-CFLAGS = -Wall -I../../include -g -fPIE
+CFLAGS = -Wall -g -fsanitize=address -I../../include -g -fPIE
 
 # 库名称
 LIBNAME := myfile

@@ -1,7 +1,7 @@
 # src/mywc/Makefile
 
 CC = gcc
-CFLAGS = -Wall -I../../include
+CFLAGS = -Wall -g -fsanitize=address -I../../include
 
 # 库名称
 LIBNAME := mywc
