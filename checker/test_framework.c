@@ -117,9 +117,13 @@ int compile_and_run(const char* source_file, const char* executable, char* outpu
     // 运行程序阶段
     switch (is_make) {
         case 2: {
-            // 🚨 修正运行路径：进入到练习题目录再跑你的自定义测试脚本
-            snprintf(run_cmd, sizeof(run_cmd), "cd ../exercises/%s && bash ../../tests/run_my_test.sh 2>&1", executable);
+            // 🚨 修正：脚本就在练习题目录下，直接运行即可
+            snprintf(run_cmd, sizeof(run_cmd), "cd ../exercises/%s && bash ./run_my_test.sh 2>&1", executable);
             fp = popen(run_cmd, "r");
+            if (fp == NULL) {
+                snprintf(output, output_size, "无法执行运行命令: %s", run_cmd);
+                return -1;
+            }
         }
         break;
         case 1:
