@@ -4,9 +4,9 @@ CC = gcc
 CFLAGS = -Wall -g -fsanitize=address -I../../include
 
 # 可执行文件名
-TARGET := mybash
+TARGET := 20_mybash
 # 最终输出到 BINDIR（比如 ./bin/）
-BINDIR ?= ./bin
+BINDIR ?= .
 # 中间文件目录（比如 ./obj/src/mybash/）
 OBJDIR ?= ./obj
 LINKLIBS ?= -L../../obj/mysed -L../../obj/mywc -L../../obj/mytrans -L../../obj/myfile
