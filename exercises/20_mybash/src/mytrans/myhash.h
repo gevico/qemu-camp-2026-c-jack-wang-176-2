@@ -2,7 +2,7 @@
 #ifndef HASH_TABLE_H
 #define HASH_TABLE_H
 
-#include "../../include/common.h"
+#include "common.h"
 
 #include <stdint.h>
 #include <string.h>

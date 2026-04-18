@@ -4,7 +4,7 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
-#include "../../include/common.h"
+#include "common.h"
 
 #define MAX_INPUT 1024
 #define MAX_ARGS 64

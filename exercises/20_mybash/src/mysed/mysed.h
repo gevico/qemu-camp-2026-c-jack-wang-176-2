@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#include "../../include/common.h"
+#include "common.h"
 
 #define MAX_LINE_LENGTH 1024
 // 确保这两行必须在文件顶部！
