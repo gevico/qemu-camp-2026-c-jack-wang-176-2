@@ -38,8 +38,20 @@ jobs:
       total_score: ${{ steps.summary.outputs.total_score }}
       max_score: ${{ steps.summary.outputs.max_score }}
     steps:
-      - name: Checkout
-        uses: actions/checkout@v5
+      - name: Run all exercises
+        # 强制 ASan 将报错信息输出到当前目录下的 asan_error.log 文件中
+        env:
+          ASAN_OPTIONS: log_path=asan_error.log
+        run: ./c-checker check-all
+
+      - name: Print ASan Core Dump Logs
+        # 无论上一步的测试是成功还是失败（core dump 肯定会导致失败），这一步都必须执行
+        if: always()
+        run: |
+          echo "================ 🚨 ASAN CORE DUMP LOG 🚨 ================"
+          # ASan 会自动在文件名后追加进程 PID，所以使用通配符 * 来读取
+          cat asan_error.log* || echo "未检测到 ASan 内存报错日志"
+          echo "=========================================================="
 
       - name: Install jq
         run: |
