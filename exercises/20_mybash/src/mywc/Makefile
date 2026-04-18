@@ -1,18 +1,11 @@
-# src/mywc/Makefile
-
 CC = gcc
-CFLAGS = -Wall -g -fsanitize=address -I../../include
+CFLAGS = -Wall -I../../include
 
-# 库名称
 LIBNAME := mywc
-# 静态库输出名：libmywc.a
 LIB := lib$(LIBNAME).a
-# 最终库输出目录（比如 ./obj/src/mywc/）
 OBJDIR ?= ./obj
-# 最终 .a 文件路径
 LIB_PATH := $(OBJDIR)/$(LIB)
 
-# 源文件
 SRCS := mywc.c
 OBJS := $(SRCS:.c=.o)
 OBJS := $(patsubst %.o,$(OBJDIR)/%.o,$(OBJS))
@@ -21,10 +14,11 @@ all: $(LIB_PATH)
 
 $(LIB_PATH): $(OBJS)
 	ar rcs $@ $^
-	@echo "$(LIBNAME)packaged done: $@"
-$(OBJDIR)/%.o:%.c
+	@echo "$(LIBNAME) packaged done: $@"
+
+$(OBJDIR)/%.o: %.c
 	@mkdir -p $(OBJDIR)
 	$(CC) $(CFLAGS) -c $< -o $@
-	
+
 clean:
 	@rm -rf $(OBJDIR)/*.o $(LIB_PATH)
