@@ -42,29 +42,40 @@ jobs:
         uses: actions/checkout@v5
 
       - name: Install Dependencies
-        # ✅ 增加 dos2unix，这是解决 Windows 代码在 Linux 运行报错的神器
+        # 安装必须的 C 库、JSON 解析工具和文件清洗工具
         run: |
           sudo apt-get update
           sudo apt-get install -y jq libelf-dev elfutils dos2unix
 
-      - name: 🛠️ 预处理环境 (权限与换行符修复)
-        # ✅ 这是解决 "No such file or directory" 的核心步骤
+      - name: 🛠️ 预处理：全自动环境修复
+        # 这个步骤专门解决“找不到文件”和“Windows 换行符报错”
         run: |
-          echo "==== 1. 修复所有脚本的换行符 ===="
-          find . -name "*.sh" -exec dos2unix {} +
+          echo "==== 1. 正在全仓库搜索测试脚本 ===="
+          SCRIPT_PATH=$(find . -name "test_20_mybash.sh" | head -n 1)
+          
+          if [ -z "$SCRIPT_PATH" ]; then
+            echo "❌ 警告：在仓库中未找到 test_20_mybash.sh！"
+            echo "👉 请确认该文件已 git add 并且路径拼写正确（Linux 区分大小写）。"
+            # 这里不直接 exit 1，让 c-checker 在运行阶段去报错更清晰
+          else
+            echo "✅ 找到脚本：$SCRIPT_PATH"
+            dos2unix "$SCRIPT_PATH"
+            chmod +x "$SCRIPT_PATH"
+          fi
+          
+          echo "==== 2. 修复所有 Makefile 格式 ===="
+          # 批量处理 Makefile 的 CRLF 换行符，防止 make 报错
           find . -name "Makefile" -exec dos2unix {} +
           
-          echo "==== 2. 赋予脚本可执行权限 ===="
-          chmod +x exercises/20_mybash/test_20_mybash.sh || true
-          
-          echo "==== 3. 确认文件位置 (调试用) ===="
-          ls -l exercises/20_mybash/test_20_mybash.sh
+          echo "==== 3. 目录结构预览 (调试用) ===="
+          ls -R exercises/20_mybash
 
       - name: Build checker
+        # 编译你已经修改过缓冲区（4096 字节）的 c-checker
         run: make c-checker
 
       - name: Run all exercises (生成成绩单)
-        # || true 保证即使其他题目崩溃，也不会中断后续的成绩单生成和上报
+        # || true 确保 24 题等未完成题目的崩溃不会中断 Actions
         run: ./c-checker check-all || true
 
       - name: Read grading summary
@@ -80,49 +91,19 @@ jobs:
             echo "max_score=$(jq -r '.test_summary.max_score' test_results_summary.json)" >> "$GITHUB_OUTPUT"
             jq '.test_summary' test_results_summary.json
           else
-             echo "Warning: test_results_summary.json not found."
+             echo "Error: test_results_summary.json was not generated."
+             exit 1
           fi
-
-      - name: Upload grading summary
-        uses: actions/upload-artifact@v6
-        with:
-          name: test-results-summary
-          path: test_results_summary.json
-          if-no-files-found: ignore
 
       - name: Publish job summary
         shell: bash
         run: |
-          total_exercises='${{ steps.summary.outputs.total_exercises }}'
-          passed_exercises='${{ steps.summary.outputs.passed_exercises }}'
-          failed_exercises='${{ steps.summary.outputs.failed_exercises }}'
-          not_completed_exercises='${{ steps.summary.outputs.not_completed_exercises }}'
-          total_score='${{ steps.summary.outputs.total_score }}'
-          max_score='${{ steps.summary.outputs.max_score }}'
-
-          if [ -n "$total_exercises" ]; then
-            {
-              echo "## OpenCamp Autograding Summary"
-              echo
-              echo "- Passed Exercises: ${passed_exercises}/${total_exercises}"
-              echo "- Score: ${total_score}/${max_score}"
-            } >> "$GITHUB_STEP_SUMMARY"
-          fi
-
-  quality-gate:
-    name: Quality Gate Summary
-    runs-on: ubuntu-latest
-    needs: autograde
-    if: always()
-    steps:
-      - name: Show score status
-        run: echo "Final Score Check Completed."
-
-  report-opencamp-qemu:
-    name: Report Score To OpenCamp QEMU
-    runs-on: ubuntu-latest
-    needs: autograde
-    if: always() && github.event_name != 'pull_request' && needs.autograde.outputs.total_score != ''
-    steps:
-      - name: Finalizing
-        run: echo "Reporting score..."
+          passed='${{ steps.summary.outputs.passed_exercises }}'
+          total='${{ steps.summary.outputs.total_exercises }}'
+          score='${{ steps.summary.outputs.total_score }}'
+          max='${{ steps.summary.outputs.max_score }}'
+          {
+            echo "## OpenCamp Autograding Summary"
+            echo "- **Passed:** $passed / $total"
+            echo "- **Score:** $score / $max"
+          } >> "$GITHUB_STEP_SUMMARY"
