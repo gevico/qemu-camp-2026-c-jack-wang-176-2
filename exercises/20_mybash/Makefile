@@ -8,17 +8,18 @@ $(SUBDIRS):
 	@mkdir -p $(PWD)/obj/$@
 	$(MAKE) -C src/$@ OBJDIR=$(PWD)/obj/$@
 
-# 加入 FORCE，强迫每次都执行主程序编译，防止跳过
-mybash 20_mybash: $(SUBDIRS) FORCE
-	@echo "=> 正在编译主程序: 20_mybash"
+# 🚨 关键修改：将 TARGET 统一为 mybash，BINDIR 指向当前目录下的 bin
+mybash: $(SUBDIRS) FORCE
+	@echo "=> 正在编译主程序: mybash"
 	@mkdir -p $(PWD)/obj/mybash
-	$(MAKE) -C src/mybash OBJDIR=$(PWD)/obj/mybash BINDIR=$(PWD) TARGET=20_mybash
+	@mkdir -p $(PWD)/bin
+	$(MAKE) -C src/mybash OBJDIR=$(PWD)/obj/mybash BINDIR=$(PWD)/bin TARGET=mybash
 
 clean:
 	@echo "=> 清理所有编译产物..."
-	rm -rf $(PWD)/obj $(PWD)/bin $(PWD)/20_mybash
+	rm -rf $(PWD)/obj $(PWD)/bin
 	@echo "=> 清理完成"
 
 FORCE:
 
-.PHONY: all $(SUBDIRS) mybash 20_mybash clean FORCE
+.PHONY: all $(SUBDIRS) mybash clean FORCE

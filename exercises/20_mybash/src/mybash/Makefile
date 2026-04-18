@@ -1,10 +1,10 @@
 CC = gcc
 CFLAGS = -Wall -I../../include
-LDFLAGS = 
 
-# 🚨 名字和路径必须严格对齐测试框架预期
-TARGET := 20_mybash
-BINDIR := ../../
+# 🚨 关键修改 1：根据报错信息，可执行文件名必须是 mybash
+TARGET := mybash
+# 🚨 关键修改 2：输出到练习题根目录下的 bin 文件夹
+BINDIR := ../../bin
 OBJDIR := ./obj
 
 LINKLIBS := -L../../obj/mysed -L../../obj/mywc -L../../obj/mytrans -L../../obj/myfile
