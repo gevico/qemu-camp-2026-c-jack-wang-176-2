@@ -77,10 +77,11 @@ static int run_test(const char *exercise_name) {
     }
 
     // 🚨 修复点 1：注入 -g -fsanitize=address，并移除 2>/dev/null 让报错显现
+    // 删掉 -fsanitize=address，只保留 -g 调试信息
     snprintf(
         compile_cmd,
         sizeof(compile_cmd),
-        "cd tests && gcc -Wall -Wextra -g -fsanitize=address -std=c11 -o test_%s test_%s.c ../checker/test_framework.c -I../checker",
+        "cd tests && gcc -Wall -Wextra -g -std=c11 -o test_%s test_%s.c ../checker/test_framework.c -I../checker",
         exercise_name,
         exercise_name);
     

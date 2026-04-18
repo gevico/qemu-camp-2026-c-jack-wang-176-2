@@ -1,29 +1,27 @@
 CC = gcc
-# 已经确认代码健康，关闭 ASan 以免污染标准输出，影响测试框架的字符串匹配
 CFLAGS = -Wall -I../../include
 LDFLAGS = 
 
+# 🚨 名字和路径必须严格对齐测试框架预期
 TARGET := 20_mybash
-BINDIR ?= .
-OBJDIR ?= ./obj
-LINKLIBS ?= -L../../obj/mysed -L../../obj/mywc -L../../obj/mytrans -L../../obj/myfile
+BINDIR := ../../
+OBJDIR := ./obj
+
+LINKLIBS := -L../../obj/mysed -L../../obj/mywc -L../../obj/mytrans -L../../obj/myfile
 LDLIBS := -lmysed -lmywc -lmytrans -lmyfile -lelf
 
 SRCS := main.c
-OBJS := $(SRCS:.c=.o)
-OBJS := $(patsubst %.o,$(OBJDIR)/%.o,$(OBJS))
+OBJS := $(OBJDIR)/main.o
 
-TARGET_PATH := $(BINDIR)/$(TARGET)
+all: $(BINDIR)/$(TARGET)
 
-all: $(TARGET_PATH)
-
-$(TARGET_PATH): $(OBJS)
+$(BINDIR)/$(TARGET): $(OBJS)
 	@mkdir -p $(dir $@)
-	$(CC) $(CFLAGS) $^ -o $@ $(LDFLAGS) $(LINKLIBS) $(LDLIBS)
+	$(CC) $(CFLAGS) $^ -o $@ $(LINKLIBS) $(LDLIBS)
 
 $(OBJDIR)/%.o: %.c
 	@mkdir -p $(dir $@)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 clean:
-	@rm -rf $(OBJDIR)/*.o $(TARGET_PATH)
+	@rm -rf $(OBJDIR) $(BINDIR)/$(TARGET)
