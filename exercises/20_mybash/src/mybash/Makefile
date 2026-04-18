@@ -23,9 +23,8 @@ TARGET_PATH := $(BINDIR)/$(TARGET)
 all: $(TARGET_PATH)
 
 $(TARGET_PATH): $(OBJS)
-    @mkdir -p $(dir $@)
-    # 将 LDFLAGS 放在对象文件之后，库文件之前
-    $(CC) $(CFLAGS) $^ -o $@ $(LDFLAGS) $(LINKLIBS) $(LDLIBS)
+	@mkdir -p $(dir $@)
+	$(CC) $(CFLAGS) $^ -o $@ $(LDFLAGS) $(LINKLIBS) $(LDLIBS)
 $(OBJDIR)/%.o: %.c
 	@mkdir -p $(dir $@)
 	$(CC) $(CFLAGS) -c $< -o $@
