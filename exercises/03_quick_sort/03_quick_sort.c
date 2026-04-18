@@ -64,5 +64,6 @@ int main(void) {
         printf("%s %d\n", students[i].name, students[i].score);
     }
 
+    
     return 0;
 }
