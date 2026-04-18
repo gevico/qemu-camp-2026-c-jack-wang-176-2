@@ -76,24 +76,31 @@ static int run_test(const char *exercise_name) {
         return -1;
     }
 
+    // 🚨 修复点 1：注入 -g -fsanitize=address，并移除 2>/dev/null 让报错显现
     snprintf(
         compile_cmd,
         sizeof(compile_cmd),
-        "cd tests && gcc -Wall -Wextra -std=c11 -o test_%s test_%s.c ../checker/test_framework.c -I../checker "
-        "2>/dev/null",
+        "cd tests && gcc -Wall -Wextra -g -fsanitize=address -std=c11 -o test_%s test_%s.c ../checker/test_framework.c -I../checker",
         exercise_name,
         exercise_name);
+    
     compile_result = system(compile_cmd);
     if (compile_result != 0) {
         printf(COLOR_RED "❌ 测试编译失败: %s" COLOR_RESET "\n", exercise_name);
         return -1;
     }
 
-    snprintf(run_cmd, sizeof(run_cmd), "cd tests && ./test_%s", exercise_name);
+    // 🚨 修复点 2：显式开启 ASan 颜色输出
+    snprintf(run_cmd, sizeof(run_cmd), "cd tests && ASAN_OPTIONS=color=always ./test_%s", exercise_name);
     test_result = system(run_cmd);
 
-    snprintf(cleanup_cmd, sizeof(cleanup_cmd), "cd tests && rm -f test_%s", exercise_name);
-    system(cleanup_cmd);
+    // 🚨 修复点 3：测试如果失败，不删除二进制文件，保留犯罪现场
+    if (test_result == 0) {
+        snprintf(cleanup_cmd, sizeof(cleanup_cmd), "cd tests && rm -f test_%s", exercise_name);
+        system(cleanup_cmd);
+    } else {
+        printf(COLOR_YELLOW "⚠️  测试失败或发生段错误！已保留二进制文件 tests/test_%s 以供调试" COLOR_RESET "\n", exercise_name);
+    }
 
     return test_result == 0 ? 0 : 1;
 }

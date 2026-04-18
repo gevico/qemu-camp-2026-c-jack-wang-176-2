@@ -41,11 +41,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v5
 
-      - name: Install Dependencies
+      - name: Install jq
         run: |
           sudo apt-get update
-          # 新增 gdb 和 file，用于后续分析 core dump 文件
-          sudo apt-get install -y jq gdb file
+          sudo apt-get install -y jq
 
       - name: Show toolchain versions
         run: |
@@ -53,58 +52,21 @@ jobs:
           gcc --version | head -n1
           make --version | head -n1
           jq --version
-          gdb --version | head -n1
 
       - name: Build checker
         run: make c-checker
 
-      - name: Run all exercises with Core Dump Enabled
-        run: |
-          # 1. 开启无限制的 core dump 生成
-          ulimit -c unlimited
-          # 2. 修改内核参数，让 core 文件直接生成在当前运行目录下，命名为 core.PID
-          sudo sysctl -w kernel.core_pattern=core.%p
-          
-          # 3. 运行测试，即使发生段错误崩溃，也继续执行下一步 (|| true)
-          ./c-checker check-all || true
+      - name: 🚨 专属调试优先：单独运行第 20 题 (查看 ASan 报错) 🚨
+        # 这里会直接把 ASan 的详细红色报错喷在控制台！
+        run: ./c-checker check 20_mybash || true
 
-      - name: Extract GDB Backtrace from Core Dump
-        if: always()
-        run: |
-          echo "================ 🚨 捕获到的底层段错误 🚨 ================"
-          # 用 dmesg 看看内核记录的段错误信息（可能包含报错的内存地址和动态库）
-          sudo dmesg -T | grep -i segfault || echo "内核没有段错误记录"
-          
-          echo "================ 🚨 GDB 函数调用栈 🚨 ================"
-          # 在当前目录寻找刚才生成的 core 快照文件
-          CORE_FILE=$(find . -maxdepth 1 -name "core.*" | head -n 1)
-          
-          if [ -n "$CORE_FILE" ]; then
-            echo "找到了内存快照: $CORE_FILE"
-            # 尝试通过 file 命令读取快照，提取原可执行文件路径
-            EXE_FILE=$(file "$CORE_FILE" | grep -oP "from '\K[^']+")
-            
-            if [ -n "$EXE_FILE" ]; then
-              echo "崩溃的程序是: $EXE_FILE"
-              # 让 GDB 自动读取快照，打印完整的函数调用栈 (backtrace)
-              gdb -batch -ex "bt full" -ex "quit" "$EXE_FILE" "$CORE_FILE"
-            else
-              echo "未能自动提取可执行文件路径，尝试盲读 Core Dump..."
-              gdb -batch -ex "bt full" -ex "quit" -c "$CORE_FILE"
-            fi
-            
-            echo "=========================================================="
-            # 如果生成了 core 文件，说明程序的确崩溃了，这里强制退出标记 Action 为红叉
-            exit 1
-          else
-            echo "没有生成 Core Dump 文件，程序可能没有触发段错误。"
-            echo "=========================================================="
-          fi
+      - name: Run all exercises (生成成绩单)
+        # || true 保证即使其他题目崩溃，也不会中断后续的成绩单生成和上报
+        run: ./c-checker check-all || true
 
       - name: Read grading summary
         id: summary
         shell: bash
-        # 添加 || true 防止因为测试崩溃没生成 summary.json 导致这里卡死
         run: |
           if [ -f test_results_summary.json ]; then
             echo "total_exercises=$(jq -r '.test_summary.total_exercises' test_results_summary.json)" >> "$GITHUB_OUTPUT"
@@ -115,12 +77,11 @@ jobs:
             echo "max_score=$(jq -r '.test_summary.max_score' test_results_summary.json)" >> "$GITHUB_OUTPUT"
             jq '.test_summary' test_results_summary.json
           else
-            echo "Warning: test_results_summary.json not found."
+             echo "Warning: test_results_summary.json not found."
           fi
 
       - name: Upload grading summary
         uses: actions/upload-artifact@v6
-        if: always()
         with:
           name: test-results-summary
           path: test_results_summary.json
@@ -128,7 +89,6 @@ jobs:
 
       - name: Publish job summary
         shell: bash
-        if: always()
         run: |
           total_exercises='${{ steps.summary.outputs.total_exercises }}'
           passed_exercises='${{ steps.summary.outputs.passed_exercises }}'
@@ -150,9 +110,6 @@ jobs:
               echo "- Not Completed Exercises: ${not_completed_exercises}"
               echo "- Score: ${total_score}/${max_score}"
             } >> "$GITHUB_STEP_SUMMARY"
-          else
-             echo "## OpenCamp Autograding Summary" >> "$GITHUB_STEP_SUMMARY"
-             echo "⚠️ Test suite crashed before generating a summary." >> "$GITHUB_STEP_SUMMARY"
           fi
 
   quality-gate:
@@ -234,8 +191,6 @@ jobs:
             --argjson totalScore "$MAX_SCORE" \
             '{channel: $channel, courseId: $courseId, ext: $ext, name: $name, score: $score, totalScore: $totalScore}' > "$SUMMARY"
 
-          cat "$SUMMARY"
-
           curl --fail-with-body -X POST "$OPENCAMP_API_URL" \
             -H "accept: application/json;charset=utf-8" \
             -H "Content-Type: application/json" \
@@ -252,12 +207,10 @@ jobs:
             echo "status=skipped" >> "$GITHUB_OUTPUT"
             exit 0
           fi
-
           if [ "${{ steps.report-qemu.outcome }}" = "success" ]; then
             echo "status=reported" >> "$GITHUB_OUTPUT"
             exit 0
           fi
-
           echo "status=failed" >> "$GITHUB_OUTPUT"
           exit 0
 
