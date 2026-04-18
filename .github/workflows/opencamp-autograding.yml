@@ -41,12 +41,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v5
 
-      - name: Install jq
+      - name: Install Dependencies
+        # 🚨 这里是关键！我帮你把 libelf-dev 和 elfutils 都加上了 🚨
         run: |
           sudo apt-get update
-          sudo apt-get install -y jq
-
-          
+          sudo apt-get install -y jq libelf-dev elfutils
 
       - name: Show toolchain versions
         run: |
