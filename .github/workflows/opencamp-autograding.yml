@@ -41,10 +41,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v5
 
-      - name: Install jq
+      - name: Install Dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y jq
+          # 新增 gdb 和 file，用于后续分析 core dump 文件
+          sudo apt-get install -y jq gdb file
 
       - name: Show toolchain versions
         run: |
@@ -52,42 +53,82 @@ jobs:
           gcc --version | head -n1
           make --version | head -n1
           jq --version
+          gdb --version | head -n1
 
       - name: Build checker
         run: make c-checker
 
-      - name: Run all exercises
-        env:
-          ASAN_OPTIONS: log_path=asan_error.log
-        run: ./c-checker check-all
+      - name: Run all exercises with Core Dump Enabled
+        run: |
+          # 1. 开启无限制的 core dump 生成
+          ulimit -c unlimited
+          # 2. 修改内核参数，让 core 文件直接生成在当前运行目录下，命名为 core.PID
+          sudo sysctl -w kernel.core_pattern=core.%p
+          
+          # 3. 运行测试，即使发生段错误崩溃，也继续执行下一步 (|| true)
+          ./c-checker check-all || true
 
-      - name: Print ASan Core Dump Logs
+      - name: Extract GDB Backtrace from Core Dump
         if: always()
         run: |
-          echo "================ 🚨 ASAN CORE DUMP LOG 🚨 ================"
-          cat asan_error.log* || echo "未检测到 ASan 内存报错日志"
-          echo "=========================================================="
+          echo "================ 🚨 捕获到的底层段错误 🚨 ================"
+          # 用 dmesg 看看内核记录的段错误信息（可能包含报错的内存地址和动态库）
+          sudo dmesg -T | grep -i segfault || echo "内核没有段错误记录"
+          
+          echo "================ 🚨 GDB 函数调用栈 🚨 ================"
+          # 在当前目录寻找刚才生成的 core 快照文件
+          CORE_FILE=$(find . -maxdepth 1 -name "core.*" | head -n 1)
+          
+          if [ -n "$CORE_FILE" ]; then
+            echo "找到了内存快照: $CORE_FILE"
+            # 尝试通过 file 命令读取快照，提取原可执行文件路径
+            EXE_FILE=$(file "$CORE_FILE" | grep -oP "from '\K[^']+")
+            
+            if [ -n "$EXE_FILE" ]; then
+              echo "崩溃的程序是: $EXE_FILE"
+              # 让 GDB 自动读取快照，打印完整的函数调用栈 (backtrace)
+              gdb -batch -ex "bt full" -ex "quit" "$EXE_FILE" "$CORE_FILE"
+            else
+              echo "未能自动提取可执行文件路径，尝试盲读 Core Dump..."
+              gdb -batch -ex "bt full" -ex "quit" -c "$CORE_FILE"
+            fi
+            
+            echo "=========================================================="
+            # 如果生成了 core 文件，说明程序的确崩溃了，这里强制退出标记 Action 为红叉
+            exit 1
+          else
+            echo "没有生成 Core Dump 文件，程序可能没有触发段错误。"
+            echo "=========================================================="
+          fi
 
       - name: Read grading summary
         id: summary
         shell: bash
+        # 添加 || true 防止因为测试崩溃没生成 summary.json 导致这里卡死
         run: |
-          echo "total_exercises=$(jq -r '.test_summary.total_exercises' test_results_summary.json)" >> "$GITHUB_OUTPUT"
-          echo "passed_exercises=$(jq -r '.test_summary.passed_exercises' test_results_summary.json)" >> "$GITHUB_OUTPUT"
-          echo "failed_exercises=$(jq -r '.test_summary.failed_exercises' test_results_summary.json)" >> "$GITHUB_OUTPUT"
-          echo "not_completed_exercises=$(jq -r '.test_summary.not_completed_exercises' test_results_summary.json)" >> "$GITHUB_OUTPUT"
-          echo "total_score=$(jq -r '.test_summary.total_score' test_results_summary.json)" >> "$GITHUB_OUTPUT"
-          echo "max_score=$(jq -r '.test_summary.max_score' test_results_summary.json)" >> "$GITHUB_OUTPUT"
-          jq '.test_summary' test_results_summary.json
+          if [ -f test_results_summary.json ]; then
+            echo "total_exercises=$(jq -r '.test_summary.total_exercises' test_results_summary.json)" >> "$GITHUB_OUTPUT"
+            echo "passed_exercises=$(jq -r '.test_summary.passed_exercises' test_results_summary.json)" >> "$GITHUB_OUTPUT"
+            echo "failed_exercises=$(jq -r '.test_summary.failed_exercises' test_results_summary.json)" >> "$GITHUB_OUTPUT"
+            echo "not_completed_exercises=$(jq -r '.test_summary.not_completed_exercises' test_results_summary.json)" >> "$GITHUB_OUTPUT"
+            echo "total_score=$(jq -r '.test_summary.total_score' test_results_summary.json)" >> "$GITHUB_OUTPUT"
+            echo "max_score=$(jq -r '.test_summary.max_score' test_results_summary.json)" >> "$GITHUB_OUTPUT"
+            jq '.test_summary' test_results_summary.json
+          else
+            echo "Warning: test_results_summary.json not found."
+          fi
 
       - name: Upload grading summary
         uses: actions/upload-artifact@v6
+        if: always()
         with:
           name: test-results-summary
           path: test_results_summary.json
+          if-no-files-found: ignore
 
       - name: Publish job summary
         shell: bash
+        if: always()
         run: |
           total_exercises='${{ steps.summary.outputs.total_exercises }}'
           passed_exercises='${{ steps.summary.outputs.passed_exercises }}'
@@ -96,18 +137,23 @@ jobs:
           total_score='${{ steps.summary.outputs.total_score }}'
           max_score='${{ steps.summary.outputs.max_score }}'
 
-          {
-            echo "## OpenCamp Autograding Summary"
-            echo
-            echo "- Repository: \`${{ github.repository }}\`"
-            echo "- Actor: \`${{ github.actor }}\`"
-            echo "- Event: \`${{ github.event_name }}\`"
-            echo "- Ref: \`${{ github.ref_name }}\`"
-            echo "- Passed Exercises: ${passed_exercises}/${total_exercises}"
-            echo "- Failed Exercises: ${failed_exercises}"
-            echo "- Not Completed Exercises: ${not_completed_exercises}"
-            echo "- Score: ${total_score}/${max_score}"
-          } >> "$GITHUB_STEP_SUMMARY"
+          if [ -n "$total_exercises" ]; then
+            {
+              echo "## OpenCamp Autograding Summary"
+              echo
+              echo "- Repository: \`${{ github.repository }}\`"
+              echo "- Actor: \`${{ github.actor }}\`"
+              echo "- Event: \`${{ github.event_name }}\`"
+              echo "- Ref: \`${{ github.ref_name }}\`"
+              echo "- Passed Exercises: ${passed_exercises}/${total_exercises}"
+              echo "- Failed Exercises: ${failed_exercises}"
+              echo "- Not Completed Exercises: ${not_completed_exercises}"
+              echo "- Score: ${total_score}/${max_score}"
+            } >> "$GITHUB_STEP_SUMMARY"
+          else
+             echo "## OpenCamp Autograding Summary" >> "$GITHUB_STEP_SUMMARY"
+             echo "⚠️ Test suite crashed before generating a summary." >> "$GITHUB_STEP_SUMMARY"
+          fi
 
   quality-gate:
     name: Quality Gate Summary
@@ -124,7 +170,7 @@ jobs:
           max_score='${{ needs.autograde.outputs.max_score }}'
 
           if [ -z "$total_exercises" ] || [ -z "$passed_exercises" ]; then
-            echo "Missing autograding outputs."
+            echo "Missing autograding outputs. Tests may have crashed."
             exit 0
           fi
 
@@ -237,7 +283,7 @@ jobs:
           {
             echo "## OpenCamp Reporting Status"
             echo
-            echo "- Score: ${total_score}/${max_score}"
-            echo "- Passed Exercises: ${passed_exercises}/${total_exercises}"
+            echo "- Score: ${total_score:-0}/${max_score:-0}"
+            echo "- Passed Exercises: ${passed_exercises:-0}/${total_exercises:-0}"
             echo "- OpenCamp QEMU: ${qemu_status}"
           } >> "$GITHUB_STEP_SUMMARY"
