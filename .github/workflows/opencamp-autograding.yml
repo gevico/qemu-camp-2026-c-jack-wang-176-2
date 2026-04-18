@@ -56,9 +56,53 @@ jobs:
       - name: Build checker
         run: make c-checker
 
-      - name: 🚨 专属调试优先：单独运行第 20 题 (查看 ASan 报错) 🚨
-        # 这里会直接把 ASan 的详细红色报错喷在控制台！
-        run: ./c-checker check 20_mybash || true
+      - name: 🚨 绝杀：运行自定义场景脚本，捕捉 ELF 解析器 Bug 🚨
+        run: |
+          cd exercises/20_mybash
+          
+          echo "==== 1. 强制带 ASan 编译 ===="
+          make clean
+          make all CC=gcc CFLAGS="-Wall -g -fsanitize=address -I$(pwd)/include" LDFLAGS="-fsanitize=address"
+          
+          if [ ! -f "./bin/mybash" ]; then
+            echo "❌ 编译失败，请检查上方日志！"
+            exit 1
+          fi
+          
+          echo "==== 2. 植入你的还原脚本 ===="
+          cat << 'EOF' > run_my_test.sh
+          #!/bin/bash
+          echo "[构建测试环境...]"
+          echo "int main(){}" > /tmp/dummy_pie.c
+          gcc /tmp/dummy_pie.c -fPIE -pie -o /tmp/dummy_pie
+          gcc /tmp/dummy_pie.c -c -o /tmp/dummy_rel.o
+
+          cat << 'INNER_EOF' > test_cmds.mybash
+          myfile /tmp/dummy_pie
+          myfile /tmp/dummy_rel.o
+          mysed s/mac/linux/ "mac is opensource. unix is free os."
+          mytrans test_input.txt
+          mywc test_input.txt
+          INNER_EOF
+
+          cat << 'INNER_EOF' > test_input.txt
+          code empowers individuals to be creators in
+          and and and and and and and and and and and
+          the the the the the the the the the the
+          skilled just just just
+          INNER_EOF
+          
+          echo "[环境构建完毕，开始执行 ASan 处刑！]"
+          # 关键：在这里给你的 mybash 挂上 ASan 输出
+          ASAN_OPTIONS=color=always ./bin/mybash test_cmds.mybash
+          
+          rm -f /tmp/dummy_pie* /tmp/dummy_rel.o test_cmds.mybash test_input.txt
+          EOF
+          
+          chmod +x run_my_test.sh
+          
+          echo "==== 3. 直击崩溃现场 ===="
+          ./run_my_test.sh
 
       - name: Run all exercises (生成成绩单)
         # || true 保证即使其他题目崩溃，也不会中断后续的成绩单生成和上报
