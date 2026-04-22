@@ -20,8 +20,12 @@ typedef struct {
 
 // djb2哈希函数
 unsigned long djb2_hash(const char *str) {
-    // TODO: 在这里添加你的代码
-    // I AM NOT DONE
+    unsigned long hash = 5381;
+    int c;
+    while((c=*str++)){
+        hash = ((hash<<5)+hash)+c;
+    }
+    return hash;
 }
 
 // 创建哈希表
@@ -35,25 +39,44 @@ HashTable *create_hash_table(int size) {
 // 向哈希表中插入单词
 void hash_table_insert(HashTable *ht, const char *word) {
     unsigned long hash = djb2_hash(word) % ht->size;
-
-    // TODO: 在这里添加你的代码
-    // I AM NOT DONE
+    HashNode* now_node = ht->table[hash];
+    while(now_node){
+        if(strcmp(now_node->word,word)==0){
+            now_node->count++;
+            return;
+        }
+        now_node = now_node->next;
+    }
+    HashNode* new_node = malloc(sizeof(HashNode));
+    new_node->word = malloc(strlen(word)+1);
+    strcpy(new_node->word,word);
+    new_node->count = 1;
+    new_node->next = ht->table[hash];
+    ht->table[hash] = new_node;
+    return;
 }
 
 // 从哈希表中获取所有单词及其计数
 void get_all_words(HashTable *ht, HashNode **nodes, int *count) {
-    // TODO: 在这里添加你的代码
-    // I AM NOT DONE
+    *count = 0;
+    for(int i=0;i<ht->size;i++){
+        HashNode* node = ht->table[i];
+        while(node){
+            nodes[*count] = node;
+            (*count)++;
+            node= node->next;
+        }
+    }
 }
 
 // 比较函数用于排序
 int compare_nodes(const void *a, const void *b) {
     HashNode *node_a = *(HashNode **)a;
     HashNode *node_b = *(HashNode **)b;
-    
-    // 先按计数降序，再按字母升序
-    // TODO: 在这里添加你的代码
-    // I AM NOT DONE
+    if(node_a->count != node_b->count){
+        return node_b->count-node_a->count;
+    }
+    return strcmp(node_a->word,node_b->word);
 }
 
 // 释放哈希表内存
@@ -73,8 +96,25 @@ void free_hash_table(HashTable *ht) {
 
 // 从字符串中获取下一个单词
 char *get_next_word(const char **text) {
-    // TODO: 在这里添加你的代码
-    // I AM NOT DONE
+    const char* p = *text;
+    while(*p!='\0'&&!isalpha(*p)){
+        p++;
+    }
+    if(*p == '\0'){
+        return NULL;
+    }
+    const char* start = p;
+    while(*p!='\0'&&isalpha(*p)){
+        p++;
+    }
+    int len = p-start;
+    char* word = malloc(len+1);
+    for(int i = 0;i<len;i++){
+        word[i] = tolower((unsigned char)(start[i]));
+    }
+    word[len] = '\0';
+    *text = p;
+    return word;
 }
 
 int main(int argc, char *argv[]) {
