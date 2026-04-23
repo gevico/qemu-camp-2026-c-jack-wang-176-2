@@ -16,7 +16,7 @@ unsigned int gcd_asm(unsigned int a, unsigned int b) {
         "   mov %%edx, %%ebx\n\t"
         
         ".L_check:\n\t"
-        "   test %%ebx %%ebx\n\t"      // 测试ebx是否为0
+        "   test %%ebx, %%ebx\n\t"      // 测试ebx是否为0
         "   jne .L_loop\n\t"    // 如果不为0，继续循环
         
         "mov %%eax, %0"         // 将结果（eax）存入输出变量
