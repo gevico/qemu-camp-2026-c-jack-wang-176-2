@@ -32,54 +32,141 @@ typedef struct {
 } LRUCache;
 
 static unsigned hash_int(int key) {
-    // TODO: 在这里添加你的代码
-    // I AM NOT DONE
+    return (unsigned)key * 2654435761 % 4294967296; /* Knuth's multiplicative hash */
 }
 
 static HashEntry* hash_find(LRUCache* c, int key, HashEntry*** pprev_next) {
-    // TODO: 在这里添加你的代码
-    // I AM NOT DONE
+   unsigned hash = hash_int(key) % c->bucket_count;
+   HashEntry** curr = &c->buckets[hash];
+   while(*curr){
+    if((*curr)->key==key){
+        if(pprev_next) *pprev_next = curr;
+        return *curr;
+    }
+    curr = &(*curr)->next;
+   }
+   return NULL;
 }
 
 static void list_add_to_head(LRUCache* c, LRUNode* node) {
-    // TODO: 在这里添加你的代码
-    // I AM NOT DONE
+    node->prev = NULL;
+    node->next = c->head;
+    if(c->head){
+        c->head->prev = node;
+    }
+    c->head = node;
+    if(c->tail == NULL){
+        c->tail = node;
+    }
 }
 
 static void list_remove(LRUCache* c, LRUNode* node) {
-    // TODO: 在这里添加你的代码
-    // I AM NOT DONE
+    if(node->prev){
+        node->prev->next = node->next;
+    }else{
+        c->head = node->next;
+    }
+    if(node->next){
+        node->next->prev = node->prev;
+    }else{
+        c->tail = node->prev;
+    }
 }
 
 static void list_move_to_head(LRUCache* c, LRUNode* node) {
-    // TODO: 在这里添加你的代码
-    // I AM NOT DONE
+    list_remove(c,node);
+    list_add_to_head(c,node);
 }
 
 static LRUNode* list_pop_tail(LRUCache* c) {
-    // TODO: 在这里添加你的代码
-    // I AM NOT DONE
+    LRUNode * tail = c->tail;
+    if(tail){
+        list_remove(c,tail);
+    }
+    return tail;
 }
 
 /* LRU 接口实现 */
 static LRUCache* lru_create(int capacity) {
-    // TODO: 在这里添加你的代码
-    // I AM NOT DONE
+    if(capacity<0){
+        return NULL;
+    }
+    LRUCache* c = (LRUCache*)malloc(sizeof(LRUCache));
+    if(!c){
+        return NULL;
+    }
+    c->bucket_count = capacity*2;
+    c->size = 0;
+    c->head= NULL;
+    c->tail= NULL;
+    c->capacity = capacity;
+    c->buckets = (HashEntry**)calloc(c->bucket_count,sizeof(HashEntry*));
+    if(!c->buckets){
+        free(c);
+        return NULL;
+    }
+    return c;
 }
 
 static void lru_free(LRUCache* c) {
-    // TODO: 在这里添加你的代码
-    // I AM NOT DONE
+    if(!c)return;
+    LRUNode* curr = c->head;
+    while(curr){
+        LRUNode* next = curr->next;
+        free(curr);
+        curr = next;
+    }
+    for(size_t i = 0; i<c->bucket_count;++i){
+        HashEntry* curr_entry = c->buckets[i];
+        while(curr_entry){
+            HashEntry* next = curr_entry->next;
+            free(curr_entry);
+            curr_entry = next;
+        }
+    }
+    free(c->buckets);
+    free(c);
 }
 
 static int lru_get(LRUCache* c, int key, int* out_value) {
-    // TODO: 在这里添加你的代码
-    // I AM NOT DONE
+    HashEntry* entry = hash_find(c,key,NULL);
+    if(!entry) return 0;
+    LRUNode* node = entry->node;
+    *out_value = node->value;
+    list_move_to_head(c, node);
+    return 1;
 }
 
 static void lru_put(LRUCache* c, int key, int value) {
-    // TODO: 在这里添加你的代码
-    // I AM NOT DONE
+    HashEntry* entry = hash_find(c,key,NULL);
+    if(entry){
+        entry->node->value= value;
+        list_move_to_head(c,entry->node);
+    }else{
+        if(c->size>=c->capacity){
+            LRUNode* tail = list_pop_tail(c);
+            HashEntry** prrev;
+            HashEntry* old_entry = hash_find(c,tail->key,&prrev);
+            if(old_entry){
+                *prrev = old_entry->next;
+                free(old_entry);
+            }
+            free(tail);
+            c->size--;
+        }
+        LRUNode* new_node = (LRUNode*)malloc(sizeof(LRUNode));
+        new_node->value=value;
+        new_node->key = key;
+        list_add_to_head(c, new_node);
+
+        HashEntry* hash_entry = (HashEntry*)malloc(sizeof(HashEntry));
+        hash_entry->node = new_node;
+        hash_entry->key = key;
+        int hash = hash_int(key)%c->bucket_count;
+        hash_entry->next = c->buckets[hash];
+        c->buckets[hash] = hash_entry;
+        c++;
+    }
 }
 
 /* 打印当前缓存内容（从头到尾） */
