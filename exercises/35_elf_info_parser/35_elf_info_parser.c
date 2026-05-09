@@ -73,7 +73,7 @@ static void fix_phdr_endian(const Elf64_Phdr *src, Elf64_Phdr *dst, int file_is_
 static const char *etype_to_str(uint16_t e_type) {
     switch (e_type) {
         case ET_NONE: /* 无类型 */
-        case ET_NONE: return "ET_NONE";
+            return "ET_NONE";
         case ET_REL:  return "ET_REL (Relocatable)";
         case ET_EXEC: return "ET_EXEC (Executable)";
         case ET_DYN:  return "ET_DYN (Shared object / PIE)";
