@@ -165,7 +165,7 @@ static void lru_put(LRUCache* c, int key, int value) {
         int hash = hash_int(key)%c->bucket_count;
         hash_entry->next = c->buckets[hash];
         c->buckets[hash] = hash_entry;
-        c->++;
+        c->size++;
     }
 }
 
