@@ -20,25 +20,51 @@ typedef struct {
 } ring_buffer_t;
 
 static int rb_init(ring_buffer_t *rb, size_t capacity) {
-    // TODO: 在这里添加你的代码
-    // I AM NOT DONE
+    if(capacity <= 0) return -1;
+    rb->buf = (int*)malloc(sizeof(int)*capacity);
+    if(!rb->buf)return -1;
+    rb->head = 0;
+    rb->tail = 0;
+    rb->count = 0;
+    rb->capacity = capacity;
+    pthread_mutex_init(&rb->mtx,NULL);
+    pthread_cond_init(&rb->not_full,NULL);
+    pthread_cond_init(&rb->not_empty,NULL);
+    return 0;
 }
 
 static void rb_destroy(ring_buffer_t *rb) {
-    // TODO: 在这里添加你的代码
-    // I AM NOT DONE
+    free(rb->buf);
+    pthread_mutex_destroy(&rb->mtx);
+    pthread_cond_destroy(&rb->not_full);
+    pthread_cond_destroy(&rb->not_empty);
 }
 
 /* 入队：满则等待 not_full */
 static void rb_push(ring_buffer_t *rb, int val) {
-    // TODO: 在这里添加你的代码
-    // I AM NOT DONE
+    pthread_mutex_lock(&rb->mtx);
+    while(rb->count == rb -> capacity){
+        pthread_cond_wait(&rb->not_full,&rb->mtx);
+    }
+    rb -> buf[rb->tail]= val;
+    rb ->tail = (rb->tail+1)%rb->capacity;
+    rb->count++;
+    pthread_cond_signal(&rb->not_empty);
+    pthread_mutex_unlock(&rb->mtx);
 }
 
 /* 出队：空则等待 not_empty */
 static int rb_pop(ring_buffer_t *rb, int *out) {
-    // TODO: 在这里添加你的代码
-    // I AM NOT DONE
+    pthread_mutex_lock(&rb->mtx);
+    while(rb->count == 0){
+        pthread_cond_wait(&rb->not_empty,&rb->mtx);
+    }
+    *out = rb->buf[rb->head];
+    rb->head = (rb->head+1)%rb->capacity;
+    rb->count--;
+    pthread_cond_signal(&rb->not_full);
+    pthread_mutex_unlock(&rb->mtx);
+    return 0;
 }
 
 typedef struct {
@@ -53,13 +79,22 @@ typedef struct {
 } consumer_arg_t;
 
 static void *producer(void *arg) {
-    // TODO: 在这里添加你的代码
-    // I AM NOT DONE
+    producer_arg_t* msg = (producer_arg_t*)arg;
+      for(size_t i=0;i<msg->n;i++){
+        rb_push(msg->rb,msg->data[i]);
+      }
+      return NULL;
 }
 
 static void *consumer(void *arg) {
-    // TODO: 在这里添加你的代码
-    // I AM NOT DONE
+    consumer_arg_t* msg = (consumer_arg_t*)arg;
+    for(size_t i=0;i<msg->n;i++){
+        int val;
+        rb_pop(msg->rb,&val);
+        printf("%d%s",val,i==(msg->n-1)?"":",");
+    }
+    printf("\n");
+    return NULL;
 }
 
 int main(void) {
